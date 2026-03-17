@@ -2625,15 +2625,20 @@ function startGame() {
 }
 
 function restartGame() {
-  // Hide game over screen
+  // Properly hide game over screen - both class and display
   gameOverScreen.classList.remove('visible');
+  gameOverScreen.style.display = 'none';
+
+  // Reset all game over elements
   document.getElementById('newRecordBadge').classList.remove('show');
+  document.getElementById('newRecordBadge').style.display = 'none';
   document.getElementById('nameInputWrap').classList.remove('show');
+  document.getElementById('nameInputWrap').style.display = 'none';
   document.getElementById('playerNameInput').value='';
   document.getElementById('submitScore').textContent='سجّل النتيجة';
   document.getElementById('submitScore').disabled=false;
 
-  // Reset game state directly without going through start screen
+  // Reset game state
   gameRunning=true; gamePaused=false;
   score=0; level=1; combo=0; maxCombo=0;
   perfectStreak=0; shieldActive=false; shieldLeft=0;
@@ -2670,7 +2675,13 @@ function showMenu() {
   gameRunning=false; gamePaused=false;
   startScreen.style.display='flex';
   gameOverScreen.classList.remove('visible');
+  gameOverScreen.style.display = 'none';
   levelUpScreen.classList.remove('visible');
+  levelUpScreen.style.display = 'none';
+  document.getElementById('newRecordBadge').classList.remove('show');
+  document.getElementById('newRecordBadge').style.display = 'none';
+  document.getElementById('nameInputWrap').classList.remove('show');
+  document.getElementById('nameInputWrap').style.display = 'none';
   loadLeaderboard();
 }
 
@@ -2683,6 +2694,7 @@ function gameOver() {
   document.getElementById('maxCombo').textContent=maxCombo;
   document.getElementById('finalLevel').textContent=level;
   document.getElementById('accuracy').textContent=acc+'%';
+  gameOverScreen.style.display = 'flex';
   gameOverScreen.classList.add('visible');
 }
 
@@ -3458,13 +3470,17 @@ function updateHSBar() {
 function checkNewRecord() {
   isNewRecord = score > localHighScore;
   if (isNewRecord) {
+    document.getElementById('newRecordBadge').style.display = 'flex';
     document.getElementById('newRecordBadge').classList.add('show');
+    document.getElementById('nameInputWrap').style.display = 'flex';
     document.getElementById('nameInputWrap').classList.add('show');
     localHighScore = score;
     updateHSBar();
   } else {
     document.getElementById('newRecordBadge').classList.remove('show');
+    document.getElementById('newRecordBadge').style.display = 'none';
     document.getElementById('nameInputWrap').classList.remove('show');
+    document.getElementById('nameInputWrap').style.display = 'none';
   }
 }
 
