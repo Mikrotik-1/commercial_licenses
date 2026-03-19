@@ -2770,12 +2770,12 @@ function explode(x,y,color,type='normal'){
 
 /* ══════════════════════ PROGRESS ══════════════════════ */
 function updateProgress() {
-  progressFill.style.width = ((score%100)/100*100)+'%';
+  progressFill.style.width = ((score%200)/200*100)+'%';
 }
 
 /* ══════════════════════ LEVEL UP ══════════════════════ */
 function checkLevel() {
-  const nl = Math.floor(score/100)+1;
+  const nl = Math.floor(score/200)+1;
   if (nl > level) {
     level=nl; levelNumEl.textContent=level;
     speed+=0.25; spawnRate=Math.max(700,spawnRate-120); orbRadius=Math.max(14,orbRadius-0.8);
