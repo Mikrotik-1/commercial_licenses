@@ -1514,8 +1514,28 @@ input[type=range].vslider::-webkit-slider-thumb {
 }
 #sClose:hover { background:rgba(155,89,245,0.22); box-shadow:0 0 25px rgba(155,89,245,0.35); }
 
-#gameOverScreen, #levelUpScreen { display: none !important; pointer-events: none; }
-#gameOverScreen.visible, #levelUpScreen.visible { display: flex !important; pointer-events: auto; }
+#gameOverScreen, #levelUpScreen { 
+  display: none !important; 
+  pointer-events: none; 
+}
+
+#gameOverScreen.visible, #levelUpScreen.visible { 
+  display: flex !important; 
+  pointer-events: auto !important;
+  z-index: 25;
+  touch-action: auto;
+}
+
+#gameOverScreen.visible .btn-main,
+#gameOverScreen.visible #submitScore,
+#gameOverScreen.visible #playerNameInput {
+  pointer-events: auto;
+  touch-action: auto;
+  cursor: pointer;
+  position: relative;
+  z-index: 26;
+  -webkit-tap-highlight-color: rgba(255,255,255,0.15);
+}
 
 /* ══ PAUSE BUTTON ══ */
 #pauseBtn {
@@ -2876,7 +2896,10 @@ function gameOver() {
 
 /* ══════════════════════ HIT CHECK ══════════════════════ */
 function checkHit() {
-  if(!gameRunning||gamePaused) return;
+  // Strict guard — must be actively running, not paused, not game over
+  if(!gameRunning || gamePaused) return;
+  if(gameOverScreen.classList.contains('visible')) return;
+  if(levelUpScreen.classList.contains('visible')) return;
 
   // Danger orb check first
   for (let i = dangerOrbs.length - 1; i >= 0; i--) {
@@ -3112,8 +3135,22 @@ function loop(ts) {
 
 /* ══════════════════════ INPUT ══════════════════════ */
 canvas.addEventListener('click', checkHit);
-canvas.addEventListener('touchstart', e=>{ e.preventDefault(); checkHit(); }, {passive:false});
-document.addEventListener('keydown', e=>{
+canvas.addEventListener('touchstart', e=>{ 
+  e.preventDefault(); 
+  checkHit(); 
+}, {passive:false});
+
+/* Fix: only block double-tap zoom on canvas, NOT on UI buttons/inputs */
+canvas.addEventListener('touchend', e=>{ 
+  e.preventDefault(); 
+}, {passive:false});
+
+/* Allow all touches on game over screen buttons and inputs */
+document.addEventListener('touchstart', e=>{
+  const tag = e.target.tagName;
+  const isUI = e.target.closest('#gameOverScreen, #pauseModal, #settingsModal, #helpModal, #startScreen, #levelUpScreen, #nameInputWrap, #helpBtn, #pauseBtn, #settingsBtn');
+  if(isUI || tag === 'INPUT' || tag === 'BUTTON') return; // let it through
+}, {passive:true});
   if(e.code==='Space'){
     e.preventDefault();
     if(gameRunning && !gamePaused) checkHit();
@@ -3127,8 +3164,7 @@ document.addEventListener('keydown', e=>{
     else if(gameRunning && gamePaused) resumeGame();
   }
 });
-let lte=0;
-document.addEventListener('touchend',e=>{ const n=Date.now(); if(n-lte<=300)e.preventDefault(); lte=n; },false);
+/* Removed global touchend preventDefault - was blocking game over screen buttons */
 
 /* ══════════════════════ MUSIC ENGINE ══════════════════════ */
 let musicRunning = false;
