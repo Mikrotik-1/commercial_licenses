@@ -1241,7 +1241,7 @@ body {
   letter-spacing: 1px;
 }
 
-#lb-loading {
+.lb-loading {
   text-align: center;
   color: var(--text-dim);
   font-size: 11px;
@@ -3986,100 +3986,115 @@ function triggerBoom() {
   so.start(t2 + 0.1); so.stop(t2 + 0.45);
 }
 
-/* ══════════════════════ LEADERBOARD ══════════════════════ */
-const LB_KEY = 'boom_leaderboard_v1';
-const LB_MAX = 8;
+/* ══════════════════════ FIREBASE LEADERBOARD ══════════════════════ */
+const FB_URL  = 'https://boom-d4aec-default-rtdb.firebaseio.com';
+const FB_PATH = FB_URL + '/leaderboard';
+const LB_MAX  = 10;
 let localHighScore = 0;
 let isNewRecord = false;
 
+/* ── helpers ── */
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function diffLabel(d) {
+  return d==='hard' ? t('hard') : d==='normal' ? t('normal') : t('easy');
+}
+
+/* ── LOAD ── */
 async function loadLeaderboard() {
-  if(!window.storage) {
-    document.getElementById('lb-list').innerHTML = '<div class="lb-empty">Leaderboard not available</div>';
-    return;
-  }
+  const list = document.getElementById('lb-list');
+  list.innerHTML = '<div class="lb-loading">'+t('lbLoading')+'</div>';
   try {
-    const res = await window.storage.list(LB_KEY + ':');
-    if (!res || !res.keys || res.keys.length === 0) {
-      document.getElementById('lb-list').innerHTML = '<div class="lb-empty">'+t('lbEmpty')+'</div>';
-      return;
+    /* Firebase REST: orderBy score descending, top LB_MAX */
+    const url = FB_PATH + '.json?orderBy=%22score%22&limitToLast=' + LB_MAX;
+    const res  = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) throw new Error('fetch failed');
+    const data = await res.json();
+    if (!data) { list.innerHTML = '<div class="lb-empty">'+t('lbEmpty')+'</div>'; return; }
+
+    /* Convert object → array, sort descending */
+    const entries = Object.values(data).sort((a, b) => b.score - a.score);
+    renderLeaderboard(entries);
+
+    /* Update global high score */
+    if (entries.length > 0) {
+      localHighScore = Math.max(localHighScore, entries[0].score);
+      updateHSBar();
     }
-    const entries = [];
-    for (const key of res.keys) {
-      try {
-        const r = await window.storage.get(key, true);
-        if (r) entries.push(JSON.parse(r.value));
-      } catch(e) {}
-    }
-    entries.sort((a,b) => b.score - a.score);
-    const top = entries.slice(0, LB_MAX);
-    renderLeaderboard(top);
-    if (top.length > 0) { localHighScore = top[0].score; updateHSBar(); }
   } catch(e) {
-    document.getElementById('lb-list').innerHTML = '<div class="lb-empty">'+t('lbError')+'</div>';
+    list.innerHTML = '<div class="lb-empty">'+t('lbError')+'</div>';
   }
 }
 
+/* ── RENDER ── */
 function renderLeaderboard(entries) {
   const list = document.getElementById('lb-list');
   if (!entries.length) { list.innerHTML = '<div class="lb-empty">'+t('lbEmpty')+'</div>'; return; }
   const rankIcons = ['🥇','🥈','🥉'];
   const rankCls   = ['r1','r2','r3'];
-  list.innerHTML = entries.map((e, i) => `
+  list.innerHTML = entries.slice(0, LB_MAX).map((e, i) => `
     <div class="lb-row" style="animation-delay:${i*0.06}s">
-      <span class="lb-rank ${rankCls[i]||'rn'}">${rankIcons[i]||'#'+(i+1)}</span>
-      <span class="lb-name">${escHtml(e.name)}</span>
+      <span class="lb-rank ${rankCls[i]||'rn'}">${rankIcons[i]||i+1}</span>
+      <span class="lb-name">${escHtml(e.name||'—')}</span>
       <span class="lb-diff ${e.diff||'easy'}">${diffLabel(e.diff)}</span>
-      <span class="lb-score">${e.score.toLocaleString('en-US')}</span>
+      <span class="lb-score">${Number(e.score).toLocaleString('en-US')}</span>
     </div>`).join('');
 }
 
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-/* FIX 6: diffLabel uses current language */
-function diffLabel(d) {
-  return d==='hard' ? t('hard') : d==='normal' ? t('normal') : t('easy');
-}
-
+/* ── SUBMIT ── */
 async function submitToLeaderboard() {
-  if(!window.storage) { showTopNotif('⚠️', 'Leaderboard not available', 'info'); return; }
   const nameEl = document.getElementById('playerNameInput');
-  const name = nameEl.value.trim() || t('namePlaceholder').replace('...','') || 'مجهول';
-  const btn = document.getElementById('submitScore');
-  btn.textContent = '...';
-  btn.disabled = true;
+  const name   = escHtml(nameEl.value.trim().slice(0,16)) || 'مجهول';
+  const btn    = document.getElementById('submitScore');
+  btn.textContent = '...'; btn.disabled = true;
+
+  const entry = { name, score, diff: difficulty, ts: Date.now() };
+
   try {
-    const key = LB_KEY + ':' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
-    await window.storage.set(key, JSON.stringify({ name, score, diff: difficulty, ts: Date.now() }), true);
-    await trimLeaderboard();
+    /* Firebase REST POST — creates unique key automatically */
+    const res = await fetch(FB_PATH + '.json', {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify(entry)
+    });
+    if (!res.ok) throw new Error('post failed');
+
+    /* Keep only top LB_MAX — run cleanup quietly */
+    trimLeaderboard();
+
     document.getElementById('nameInputWrap').classList.remove('show');
     showTopNotif('🏆', t('scoreSubmitted'), 'double');
+    btn.textContent = '✓';
+    /* Refresh leaderboard */
+    await loadLeaderboard();
+
   } catch(e) {
     btn.textContent = t('retry');
     btn.disabled = false;
-    return;
+    showTopNotif('⚠️', t('lbError'), 'miss');
   }
-  btn.textContent = 'تم ✓';
 }
 
+/* ── TRIM (keep top LB_MAX) ── */
 async function trimLeaderboard() {
-  if(!window.storage) return;
   try {
-    const res = await window.storage.list(LB_KEY + ':');
-    if (!res || !res.keys || res.keys.length <= LB_MAX) return;
-    const entries = [];
-    for (const key of res.keys) {
-      try {
-        const r = await window.storage.get(key, true);
-        if (r) entries.push({ key, data: JSON.parse(r.value) });
-      } catch(e) {}
-    }
-    entries.sort((a,b) => b.data.score - a.data.score);
-    for (const e of entries.slice(LB_MAX)) {
-      try { await window.storage.delete(e.key, true); } catch(e) {}
-    }
-  } catch(e) {}
+    const url  = FB_PATH + '.json?orderBy=%22score%22&limitToFirst=1000';
+    const res  = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data) return;
+
+    const entries = Object.entries(data).map(([k,v]) => ({ key:k, score:v.score||0 }));
+    if (entries.length <= LB_MAX) return;
+
+    /* Delete lowest entries beyond LB_MAX */
+    entries.sort((a,b) => b.score - a.score);
+    const toDelete = entries.slice(LB_MAX);
+    await Promise.all(toDelete.map(e =>
+      fetch(FB_PATH + '/' + e.key + '.json', { method: 'DELETE' })
+    ));
+  } catch(e) { /* silent */ }
 }
 
 function updateHSBar() {
@@ -4106,6 +4121,9 @@ function checkNewRecord() {
   if (isNewRecord) {
     document.getElementById('newRecordBadge').classList.add('show');
     document.getElementById('nameInputWrap').classList.add('show');
+    document.getElementById('playerNameInput').value = '';
+    document.getElementById('submitScore').textContent = t('submitScore');
+    document.getElementById('submitScore').disabled = false;
     localHighScore = score;
     saveHighScore();
     updateHSBar();
