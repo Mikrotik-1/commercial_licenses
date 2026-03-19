@@ -306,6 +306,41 @@ body {
 
 #shieldTimer.show { opacity: 1; }
 
+#freezeTimer {
+  position: absolute;
+  top: 44px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #88eeff;
+  text-shadow: 0 0 15px #88eeff;
+  background: rgba(100,220,255,0.08);
+  border: 1px solid rgba(100,220,255,0.3);
+  border-radius: 20px;
+  padding: 5px 14px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  z-index: 15;
+}
+#freezeTimer.show { opacity: 1; }
+
+/* Freeze vignette overlay */
+#freezeOverlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 4;
+  border: 3px solid transparent;
+  transition: all 0.5s;
+  border-radius: 0;
+}
+#freezeOverlay.active {
+  border-color: rgba(100,220,255,0.55);
+  box-shadow: inset 0 0 90px rgba(100,220,255,0.1);
+}
+
 #instructions {
   position: absolute;
   bottom: 70px; width: 100%;
@@ -1708,6 +1743,8 @@ document.addEventListener('click',function(e){
 
   <div id="shieldOverlay"></div>
   <div id="shieldTimer" data-i18n="shieldActive">🛡 حماية نشطة</div>
+  <div id="freezeOverlay"></div>
+  <div id="freezeTimer">🧊 تجميد نشط</div>
 
   <div id="ui">
     <div id="hsBar"><div id="hsLabel" data-i18n="best">BEST</div><div id="hsVal">—</div></div>
@@ -1803,6 +1840,13 @@ document.addEventListener('click',function(e){
         <div class="hm-text">
           <strong class="c-orange" data-i18n="doubleTitle">نقاط مضاعفة</strong>
           <span data-i18n="doubleHelpDesc">×٢ لمدة ١٠ ثواني</span>
+        </div>
+      </div>
+      <div class="hm-row">
+        <div class="hm-icon cyan">🧊</div>
+        <div class="hm-text">
+          <strong class="c-cyan" data-i18n="freezeTitle">تجميد</strong>
+          <span data-i18n="freezeHelpDesc">تبطّئ كل الكرات ٥ ثواني</span>
         </div>
       </div>
       <button id="helpClose" onclick="closeHelp()" data-i18n="gotIt">فهمت!</button>
@@ -2160,6 +2204,7 @@ let difficulty = 'easy';
 let perfectStreak = 0;
 let shieldActive = false, shieldLeft = 0;
 let doublePoints = false, doubleEnd = 0;
+let freezeActive = false, freezeEnd = 0, freezeNotified = false;
 let levelHeartGiven = false;
 let stars = [], nebulae = [], dustParts = [], meteors = [], planets = [];
 
@@ -2205,6 +2250,17 @@ const POWERUPS = [
   {
     id:'double', icon:'⚡', title:'نقاط مضاعفة', desc:'النقاط ×٢ لمدة ١٠ ثواني', color:'#ffaa00',
     apply() { doublePoints=true; doubleEnd=Date.now()+10000; doubleNotified=false; showTopNotif('⚡', t('doubleNotif'), 'double'); }
+  },
+  {
+    id:'freeze', icon:'🧊', title:'تجميد', desc:'تبطّئ كل الكرات ٥ ثواني', color:'#88eeff',
+    apply() {
+      freezeActive=true; freezeEnd=Date.now()+5000; freezeNotified=false;
+      document.getElementById('freezeOverlay').classList.add('active');
+      document.getElementById('freezeTimer').classList.add('show');
+      document.getElementById('freezeTimer').textContent='🧊 '+t('freezeActive');
+      playSound('freeze');
+      showTopNotif('🧊', t('freezeNotif'), 'info');
+    }
   }
 ];
 
@@ -2262,6 +2318,25 @@ function playSound(type) {
     g.gain.setValueAtTime(0.35*_vol, t2);
     g.gain.exponentialRampToValueAtTime(0.01, t2+0.3);
     o.start(t2); o.stop(t2+0.3);
+  } else if (type === 'freeze') {
+    /* icy descending shimmer */
+    o.type = 'sine';
+    o.frequency.setValueAtTime(1400, t2);
+    o.frequency.exponentialRampToValueAtTime(300, t2+0.5);
+    g.gain.setValueAtTime(0.28*_vol, t2);
+    g.gain.linearRampToValueAtTime(0.18*_vol, t2+0.25);
+    g.gain.exponentialRampToValueAtTime(0.01, t2+0.55);
+    o.start(t2); o.stop(t2+0.55);
+    /* second high sparkle layer */
+    const o2 = audioCtx.createOscillator();
+    const g2 = audioCtx.createGain();
+    o2.type = 'sine';
+    o2.connect(g2); g2.connect(audioCtx.destination);
+    o2.frequency.setValueAtTime(2200, t2);
+    o2.frequency.exponentialRampToValueAtTime(800, t2+0.4);
+    g2.gain.setValueAtTime(0.15*_vol, t2);
+    g2.gain.exponentialRampToValueAtTime(0.01, t2+0.4);
+    o2.start(t2); o2.stop(t2+0.4);
   }
 }
 
@@ -2513,7 +2588,10 @@ class Orb {
     this.trail.push({x:this.x,y:this.y,alpha:1,r:r,col:this.col});
     if(this.trail.length>14) this.trail.shift();
     this.trail.forEach((t,i)=>{ t.alpha=(i/this.trail.length)*0.45; });
-    this.x+=this.vx; this.y+=this.vy;
+    /* FREEZE: slow down movement when freeze active */
+    const speedMult = freezeActive ? 0.25 : 1;
+    this.x += this.vx * speedMult;
+    this.y += this.vy * speedMult;
     if(Math.hypot(this.x-CX,this.y-CY)<22){this.active=false;return'missed';}
     return null;
   }
@@ -2555,6 +2633,17 @@ class Orb {
     ctx.beginPath(); ctx.arc(this.x,this.y,r*.9,0,Math.PI*2);
     ctx.strokeStyle=this.col.main; ctx.lineWidth=.8;
     ctx.globalAlpha=0.25; ctx.stroke(); ctx.globalAlpha=1;
+
+    /* Freeze: blue-ice overlay on orb */
+    if(freezeActive) {
+      const pulse = (Math.sin(globalPulse * 3) * 0.5 + 0.5);
+      ctx.beginPath(); ctx.arc(this.x,this.y,r*1.05,0,Math.PI*2);
+      ctx.strokeStyle=`rgba(136,238,255,${0.55 + pulse*0.3})`;
+      ctx.lineWidth=2; ctx.shadowBlur=12; ctx.shadowColor='#88eeff';
+      ctx.stroke(); ctx.shadowBlur=0;
+      ctx.beginPath(); ctx.arc(this.x,this.y,r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(136,238,255,0.18)`; ctx.fill();
+    }
   }
 }
 
@@ -2586,8 +2675,9 @@ class BonusOrb {
     this.trail.push({ x: this.x, y: this.y, alpha: 1, r: this.currentR });
     if (this.trail.length > 16) this.trail.shift();
     this.trail.forEach((t, i) => { t.alpha = (i / this.trail.length) * 0.55; });
-    this.x += this.vx;
-    this.y += this.vy;
+    const speedMult = freezeActive ? 0.25 : 1;
+    this.x += this.vx * speedMult;
+    this.y += this.vy * speedMult;
     const dist = Math.hypot(this.x - CX, this.y - CY);
     if (dist < 28 || Date.now() - this.born > this.ttl) {
       this.active = false;
@@ -2695,7 +2785,9 @@ class DangerOrb {
     if (this.trail.length > 10) this.trail.shift();
     this.trail.push({ x: this.x, y: this.y, alpha: 1, r: this.currentR });
     this.trail.forEach((t, i) => { t.alpha = (i / this.trail.length) * 0.5; });
-    this.x += this.vx; this.y += this.vy;
+    const speedMult = freezeActive ? 0.25 : 1;
+    this.x += this.vx * speedMult;
+    this.y += this.vy * speedMult;
     const dist = Math.hypot(this.x - CX, this.y - CY);
     if (!this.warned && dist < this.warningRadius) {
       this.warned = true;
@@ -2752,6 +2844,16 @@ class DangerOrb {
       ctx.strokeStyle = `rgba(255,80,0,${urgency * 0.8})`;
       ctx.lineWidth = 2;
       ctx.setLineDash([4, 4]); ctx.stroke(); ctx.setLineDash([]);
+    }
+    /* Freeze: ice overlay on danger orb too */
+    if(freezeActive) {
+      const pulse = (Math.sin(globalPulse * 3) * 0.5 + 0.5);
+      ctx.beginPath(); ctx.arc(this.x, this.y, r*1.05, 0, Math.PI*2);
+      ctx.strokeStyle=`rgba(136,238,255,${0.5 + pulse*0.3})`;
+      ctx.lineWidth=2; ctx.shadowBlur=10; ctx.shadowColor='#88eeff';
+      ctx.stroke(); ctx.shadowBlur=0;
+      ctx.beginPath(); ctx.arc(this.x, this.y, r, 0, Math.PI*2);
+      ctx.fillStyle='rgba(136,238,255,0.15)'; ctx.fill();
     }
   }
 }
@@ -2849,6 +2951,7 @@ function _resetState() {
   score=0; level=1; combo=0; maxCombo=0;
   perfectStreak=0; shieldActive=false; shieldLeft=0;
   doublePoints=false; doubleEnd=0; doubleNotified=false; levelHeartGiven=false;
+  freezeActive=false; freezeEnd=0; freezeNotified=false;
   earthSpin=0;
   const d=DIFF[difficulty];
   health=d.hp; maxHealth=d.hp;
@@ -2858,6 +2961,8 @@ function _resetState() {
   totalHits=0; totalAttempts=0; shakeAmt=0; globalPulse=0;
   shieldOverlay.classList.remove('active');
   shieldTimerEl.classList.remove('show');
+  document.getElementById('freezeOverlay').classList.remove('active');
+  document.getElementById('freezeTimer').classList.remove('show');
   scoreEl.textContent='0'; levelNumEl.textContent='1';
   progressFill.style.width='0%';
   renderHearts(); renderStreak();
@@ -2961,24 +3066,13 @@ function gameOver() {
 function checkHit() {
   if (!gameRunning || gamePaused) return;
 
-  // Danger orb check first
+  // Danger orb — لو ضغطت عليها مفيش أي تأثير، بس نتجاهلها ونكمل
   for (let i = dangerOrbs.length - 1; i >= 0; i--) {
     const d = dangerOrbs[i];
     if (!d || !d.active) continue;
     const dist = Math.hypot(d.x - CX, d.y - CY);
-    if (dist < 45) {
-      dangerOrbs.splice(i, 1);
-      if (typeof S === "undefined" || S.particles !== false) {
-        for (let k = 0; k < 15; k++) {
-          particles.push(new Particle(d.x, d.y, '#ff4400', 'good'));
-        }
-      }
-      rings.push(new Ring('#ff4400', 35, 'good'));
-      shakeAmt = (typeof S !== "undefined" && !S.shake) ? 0 : 6;
-      playSound('perfect');
-      showFB('💥 DESTROYED!', 'perfect');
-      score += 50;
-      scoreEl.textContent = score;
+    if (dist < 100) {
+      // تجاهل الضغطة تماماً — مفيش نقاط ومفيش عقوبة
       return;
     }
   }
@@ -3076,6 +3170,22 @@ function loop(ts) {
     }
   }
 
+  /* Freeze expiry */
+  if(freezeActive && Date.now() > freezeEnd) {
+    freezeActive = false;
+    document.getElementById('freezeOverlay').classList.remove('active');
+    document.getElementById('freezeTimer').classList.remove('show');
+    if(!freezeNotified) {
+      freezeNotified = true;
+      showTopNotif('🧊', t('freezeDone'), 'info');
+    }
+  }
+  /* Update freeze timer text while active */
+  if(freezeActive) {
+    const secsLeft = Math.ceil((freezeEnd - Date.now()) / 1000);
+    document.getElementById('freezeTimer').textContent = '🧊 ' + t('freezeActive') + ' ' + secsLeft + 's';
+  }
+
   drawBG();
 
   if(doublePoints){
@@ -3090,6 +3200,21 @@ function loop(ts) {
     vg2.addColorStop(0.08,'transparent'); vg2.addColorStop(0.92,'transparent');
     vg2.addColorStop(1,`rgba(255,170,0,${va})`);
     ctx.fillStyle=vg2; ctx.fillRect(0,0,W,H);
+  }
+
+  /* Freeze cyan vignette on canvas */
+  if(freezeActive) {
+    const fa = 0.08 + 0.04*Math.sin(globalPulse*2);
+    const fg = ctx.createLinearGradient(0,0,W,0);
+    fg.addColorStop(0,`rgba(100,220,255,${fa})`);
+    fg.addColorStop(0.12,'transparent'); fg.addColorStop(0.88,'transparent');
+    fg.addColorStop(1,`rgba(100,220,255,${fa})`);
+    ctx.fillStyle=fg; ctx.fillRect(0,0,W,H);
+    const fg2 = ctx.createLinearGradient(0,0,0,H);
+    fg2.addColorStop(0,`rgba(100,220,255,${fa})`);
+    fg2.addColorStop(0.1,'transparent'); fg2.addColorStop(0.9,'transparent');
+    fg2.addColorStop(1,`rgba(100,220,255,${fa})`);
+    ctx.fillStyle=fg2; ctx.fillRect(0,0,W,H);
   }
 
   let sx=0,sy=0;
@@ -3196,18 +3321,19 @@ function loop(ts) {
     if (!d) return false;
     const result = d.update();
     if (result === 'exploded') {
-      const pen = Math.min(score, 30);
+      const pen = Math.min(score, 100);
       score = Math.max(0, score - pen);
       scoreEl.textContent = score;
-      shakeAmt = (typeof S !== "undefined" && !S.shake) ? 0 : 10;
+      shakeAmt = (typeof S !== "undefined" && !S.shake) ? 0 : 12;
       playSound('miss');
-      showFB('-30 💥', 'miss');
+      showFB('💀 -100', 'miss');
       if (typeof S === "undefined" || S.particles !== false) {
-        for (let i = 0; i < 12; i++) {
+        for (let i = 0; i < 16; i++) {
           particles.push(new Particle(CX, CY, '#ff4400', 'good'));
         }
       }
       rings.push(new Ring('#ff4400', 35, 'good'));
+      rings.push(new Ring('#ff2200', 55, 'good'));
       scoreEl.classList.add('bump');
       setTimeout(() => scoreEl.classList.remove('bump'), 300);
       return false;
@@ -3745,6 +3871,11 @@ const LANGS = {
     lvl10Heart: 'المستوى ١٠ — قلب مجاني!',
     shieldDone: 'انتهت الحماية', doubleDone: 'انتهت النقاط المضاعفة',
     shieldHit: 'الحماية تحميك', dangerWarn: 'دائرة خطر! اتجنبها!',
+    freezeNotif: 'تجميد! الكرات أبطأ ٥ ثواني 🧊',
+    freezeActive: 'تجميد نشط',
+    freezeDone: 'انتهى التجميد',
+    freezeTitle: 'تجميد', freezeDesc: 'تبطّئ كل الكرات ٥ ثواني',
+    freezeHelpDesc: 'تبطّئ كل الكرات ٥ ثواني',
     scoreSubmitted: 'تم تسجيل نتيجتك!',
     lbLoading: 'جاري التحميل...', lbEmpty: 'لا يوجد لاعبون بعد — كن الأول!', lbError: 'تعذّر تحميل القائمة',
     shieldTitle: 'درع الحماية', shieldDesc: 'محمي من الخسارة مرتين',
@@ -3779,6 +3910,10 @@ const LANGS = {
     lvl10Heart: 'Level 10 — free heart!', shieldDone: 'Shield expired',
     doubleDone: 'Double points ended', shieldHit: 'Shield protected you',
     dangerWarn: 'Danger orb! Avoid it!', scoreSubmitted: 'Score submitted!',
+    freezeNotif: 'Freeze! Orbs slowed for 5s 🧊',
+    freezeActive: 'Freeze active', freezeDone: 'Freeze ended',
+    freezeTitle: 'Freeze', freezeDesc: 'Slows all orbs for 5 seconds',
+    freezeHelpDesc: 'Slows all orbs for 5 seconds',
     lbLoading: 'Loading...', lbEmpty: 'No players yet — be the first!', lbError: 'Failed to load leaderboard',
     shieldTitle: 'Shield', shieldDesc: 'Protected from 2 misses',
     heartTitle: 'Extra Heart', heartDesc: '+1 heart',
@@ -3811,6 +3946,8 @@ const LANGS = {
     lvl10Heart: 'Niveau 10 — cœur gratuit!', shieldDone: 'Bouclier expiré',
     doubleDone: 'Points doubles terminés', shieldHit: 'Bouclier vous a protégé',
     dangerWarn: 'Orbe danger! Évitez!', scoreSubmitted: 'Score soumis!',
+    freezeNotif: 'Gel! Orbes ralentis 5s 🧊', freezeActive: 'Gel actif', freezeDone: 'Gel terminé',
+    freezeTitle: 'Gel', freezeDesc: 'Ralentit toutes les orbes 5 secondes', freezeHelpDesc: 'Ralentit toutes les orbes 5 secondes',
     lbLoading: 'Chargement...', lbEmpty: "Aucun joueur — soyez le premier!", lbError: 'Échec du chargement',
     shieldTitle: 'Bouclier', shieldDesc: 'Protégé contre 2 ratés',
     heartTitle: 'Cœur extra', heartDesc: '+1 cœur',
@@ -3841,6 +3978,8 @@ const LANGS = {
     lvl10Heart: 'Nivel 10 — ¡corazón gratis!', shieldDone: 'Escudo expirado',
     doubleDone: 'Puntos dobles terminados', shieldHit: 'El escudo te protegió',
     dangerWarn: '¡Orbe peligroso! ¡Evítalo!', scoreSubmitted: '¡Puntuación enviada!',
+    freezeNotif: '¡Congelado! Orbes lentos 5s 🧊', freezeActive: 'Congelado activo', freezeDone: 'Congelado terminado',
+    freezeTitle: 'Congelar', freezeDesc: 'Ralentiza todos los orbes 5 segundos', freezeHelpDesc: 'Ralentiza todos los orbes 5 segundos',
     lbLoading: 'Cargando...', lbEmpty: 'Sin jugadores — ¡sé el primero!', lbError: 'Error al cargar',
     shieldTitle: 'Escudo', shieldDesc: 'Protegido de 2 fallos',
     heartTitle: 'Corazón extra', heartDesc: '+1 corazón',
@@ -3872,6 +4011,8 @@ const LANGS = {
     lvl10Heart: '第10关 — 免费生命！', shieldDone: '护盾已过期',
     doubleDone: '双倍分数结束', shieldHit: '护盾保护了你',
     dangerWarn: '危险球！躲开！', scoreSubmitted: '分数已提交！',
+    freezeNotif: '冻结！球减速5秒 🧊', freezeActive: '冻结激活', freezeDone: '冻结结束',
+    freezeTitle: '冻结', freezeDesc: '所有球减速5秒', freezeHelpDesc: '所有球减速5秒',
     lbLoading: '加载中...', lbEmpty: '暂无玩家 — 成为第一个！', lbError: '加载失败',
     shieldTitle: '护盾', shieldDesc: '防止2次失误',
     heartTitle: '额外生命', heartDesc: '+1 生命',
@@ -3903,6 +4044,8 @@ const LANGS = {
     lvl10Heart: 'Level 10 — kostenloses Herz!', shieldDone: 'Schild abgelaufen',
     doubleDone: 'Doppelte Punkte beendet', shieldHit: 'Schild hat dich geschützt',
     dangerWarn: 'Gefahren-Orb! Ausweichen!', scoreSubmitted: 'Punktzahl eingetragen!',
+    freezeNotif: 'Eingefroren! Orbs langsamer 5s 🧊', freezeActive: 'Einfrieren aktiv', freezeDone: 'Einfrieren beendet',
+    freezeTitle: 'Einfrieren', freezeDesc: 'Verlangsamt alle Orbs 5 Sekunden', freezeHelpDesc: 'Verlangsamt alle Orbs 5 Sekunden',
     lbLoading: 'Laden...', lbEmpty: 'Keine Spieler — sei der Erste!', lbError: 'Fehler beim Laden',
     shieldTitle: 'Schild', shieldDesc: 'Geschützt vor 2 Fehlern',
     heartTitle: 'Extra Herz', heartDesc: '+1 Herz',
@@ -3972,6 +4115,7 @@ function applyLang() {
     POWERUPS[0].title = t('shieldTitle'); POWERUPS[0].desc = t('shieldDesc');
     POWERUPS[1].title = t('heartTitle');  POWERUPS[1].desc = t('heartDesc');
     POWERUPS[2].title = t('doubleTitle'); POWERUPS[2].desc = t('doubleDesc');
+    POWERUPS[3].title = t('freezeTitle'); POWERUPS[3].desc = t('freezeDesc');
   }
 
   const lbLoading = document.getElementById('lb-loading');
