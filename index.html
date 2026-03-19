@@ -3018,6 +3018,12 @@ function continueGame() {
   document.getElementById('pauseBtn').classList.add('visible');
   document.getElementById('pauseBtn').textContent = '⏸';
   gamePaused = false;
+  /* Reset freeze on level-up so it doesn't carry over */
+  if (freezeActive) {
+    freezeActive = false; freezeEnd = 0; freezeNotified = false;
+    document.getElementById('freezeOverlay').classList.remove('active');
+    document.getElementById('freezeTimer').classList.remove('show');
+  }
   lastSpawn = Date.now();
   lastBonusSpawn = Date.now();
   lastDangerSpawn = Date.now();
