@@ -60,68 +60,162 @@ body {
 #hud-top {
   position: absolute;
   top: 0; left: 0; right: 0;
-  padding: 22px 22px 0;
+  padding: 14px 14px 0;
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: stretch;
+  gap: 8px;
+  pointer-events: none;
 }
 
+/* LEFT: BEST */
+#hsBar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  pointer-events: none;
+  background: rgba(212,168,67,0.06);
+  border: 1px solid rgba(212,168,67,0.22);
+  border-radius: 16px;
+  padding: 10px 14px 12px;
+  min-width: 80px;
+  position: static;
+}
+
+#hsLabel {
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: rgba(212,168,67,0.55);
+  text-transform: uppercase;
+  font-weight: 700;
+  line-height: 1;
+}
+
+#hsVal {
+  font-family: 'Cinzel', serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: rgba(212,168,67,0.5);
+  line-height: 1;
+  transition: color 0.3s;
+  direction: ltr;
+  unicode-bidi: isolate;
+  margin-top: 4px;
+}
+
+#hsVal.beating {
+  color: var(--gold-bright);
+  text-shadow: 0 0 22px rgba(212,168,67,0.85);
+  animation: hsBeat 0.5s ease;
+}
+
+@keyframes hsBeat {
+  0%,100% { transform: scale(1); }
+  50%      { transform: scale(1.1); }
+}
+
+/* CENTER: SCORE */
 #score-block {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  flex: 1;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  padding: 8px 8px 10px;
 }
 
 #scoreLabel {
-  font-size: 10px;
-  font-weight: 400;
+  font-size: 9px;
+  font-weight: 700;
   letter-spacing: 3px;
   color: var(--text-dim);
   text-transform: uppercase;
+  line-height: 1;
 }
 
 #score {
   font-family: 'Cinzel', serif;
-  font-size: 54px;
-  font-weight: 400;
-  color: var(--text-primary);
+  font-size: 48px;
+  font-weight: 700;
+  color: #fff;
   line-height: 1;
-  text-shadow: 0 0 40px rgba(200,180,255,0.4);
-  transition: color 0.2s;
+  text-shadow: 0 0 30px rgba(200,180,255,0.3);
+  transition: color 0.15s;
+  direction: ltr;
+  unicode-bidi: isolate;
+  letter-spacing: -1px;
+  margin-top: 1px;
 }
 
-#score.bump { color: var(--gold-bright); text-shadow: 0 0 40px var(--gold); }
+#score.bump {
+  color: var(--gold-bright);
+  text-shadow: 0 0 35px var(--gold), 0 0 70px rgba(212,168,67,0.25);
+}
 
+#streakBar {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+  justify-content: center;
+}
+
+.streakDot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(212,168,67,0.18);
+  border: 1px solid rgba(212,168,67,0.3);
+  transition: all 0.25s;
+}
+
+.streakDot.filled {
+  background: var(--gold);
+  border-color: var(--gold-bright);
+  box-shadow: 0 0 6px var(--gold);
+}
+
+/* RIGHT: LEVEL */
 #levelBadge {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
-  border-radius: 20px;
-  padding: 5px 12px;
-  margin-top: 6px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  background: rgba(0,200,232,0.06);
+  border: 1px solid rgba(0,200,232,0.22);
+  border-radius: 16px;
+  padding: 10px 14px 12px;
+  min-width: 80px;
+  margin-top: 0;
 }
 
 #levelBadge span:first-child {
-  font-size: 10px;
-  letter-spacing: 2px;
-  color: var(--text-dim);
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: rgba(0,200,232,0.5);
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
 }
 
 #levelNum {
   font-family: 'Cinzel', serif;
-  font-size: 14px;
+  font-size: 28px;
   color: var(--cyan);
   font-weight: 700;
-  text-shadow: 0 0 15px var(--cyan);
+  text-shadow: 0 0 18px rgba(0,200,232,0.7);
+  line-height: 1;
+  direction: ltr;
+  unicode-bidi: isolate;
+  margin-top: 4px;
 }
 
 #progressWrap {
-  width: 110px;
-  margin-top: 6px;
-  position: relative;
+  width: 100%;
+  margin-top: 8px;
 }
 
 #progressTrack {
@@ -138,17 +232,18 @@ body {
   background: linear-gradient(90deg, var(--cyan), var(--gold));
   border-radius: 2px;
   transition: width 0.35s ease;
-  box-shadow: 0 0 12px var(--cyan);
+  box-shadow: 0 0 8px var(--cyan);
 }
 
 #healthBar {
   display: flex;
-  gap: 6px;
+  gap: 4px;
   flex-wrap: wrap;
-  max-width: 130px;
+  max-width: 80px;
   justify-content: flex-end;
   margin-top: 6px;
 }
+
 
 .heart {
   font-size: 16px;
@@ -172,33 +267,6 @@ body {
   100% { transform: scale(1) rotate(0); }
 }
 
-#streakBar {
-  display: flex;
-  gap: 5px;
-  margin-top: 5px;
-  justify-content: flex-end;
-}
-
-.streakDot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: rgba(212,168,67,0.2);
-  border: 1px solid rgba(212,168,67,0.35);
-  transition: all 0.25s;
-}
-
-.streakDot.filled {
-  background: var(--gold);
-  border-color: var(--gold-bright);
-  box-shadow: 0 0 8px var(--gold);
-}
-
-#level-block {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-}
 
 #centerArea {
   position: absolute;
@@ -964,33 +1032,41 @@ body {
   box-shadow: 0 0 25px rgba(0,200,232,0.3);
 }
 
+/* ══════════════════════════════════════════
+   NOTIFICATION TOAST — single centered pill
+══════════════════════════════════════════ */
 #topNotifs {
   position: absolute;
-  top: 16px;
+  bottom: 110px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   align-items: center;
-  gap: 6px;
-  z-index: 15;
+  gap: 8px;
+  z-index: 30;
   pointer-events: none;
-  width: 240px;
+  width: 300px;
 }
 
 .top-notif {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border-radius: 30px;
+  gap: 10px;
+  padding: 10px 20px 10px 14px;
+  border-radius: 40px;
   font-size: 13px;
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   opacity: 0;
-  transform: translateY(-14px) scale(0.9);
-  transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  transform: translateY(16px) scale(0.88);
+  transition: opacity 0.35s cubic-bezier(0.34,1.56,0.64,1),
+              transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
   white-space: nowrap;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .top-notif.show {
@@ -1000,54 +1076,70 @@ body {
 
 .top-notif.hide {
   opacity: 0;
-  transform: translateY(-10px) scale(0.95);
-  transition: all 0.3s ease-in;
+  transform: translateY(-8px) scale(0.92);
+  transition: opacity 0.28s ease-in, transform 0.28s ease-in;
 }
 
+/* colour themes */
 .top-notif.heart {
-  background: rgba(224,54,110,0.12);
-  border: 1px solid rgba(224,54,110,0.4);
-  color: #ff7aa8;
-  box-shadow: 0 0 20px rgba(224,54,110,0.2);
+  background: rgba(255,30,80,0.15);
+  border: 1px solid rgba(255,80,120,0.45);
+  color: #ff8aaa;
+  box-shadow: 0 4px 24px rgba(255,30,80,0.2), inset 0 0 20px rgba(255,30,80,0.05);
 }
 
 .top-notif.shield {
-  background: rgba(0,255,150,0.08);
-  border: 1px solid rgba(0,255,150,0.35);
-  color: #00ff96;
-  box-shadow: 0 0 20px rgba(0,255,150,0.15);
+  background: rgba(0,255,150,0.1);
+  border: 1px solid rgba(0,255,150,0.4);
+  color: #00ffaa;
+  box-shadow: 0 4px 24px rgba(0,255,150,0.18), inset 0 0 20px rgba(0,255,150,0.04);
 }
 
 .top-notif.double {
-  background: rgba(255,170,0,0.1);
-  border: 1px solid rgba(255,170,0,0.35);
-  color: #ffcc55;
-  box-shadow: 0 0 20px rgba(255,170,0,0.15);
+  background: rgba(255,170,0,0.12);
+  border: 1px solid rgba(255,190,0,0.45);
+  color: #ffd55a;
+  box-shadow: 0 4px 24px rgba(255,170,0,0.2), inset 0 0 20px rgba(255,170,0,0.05);
 }
 
 .top-notif.info {
-  background: rgba(0,200,232,0.08);
-  border: 1px solid rgba(0,200,232,0.3);
-  color: var(--cyan);
-  box-shadow: 0 0 15px rgba(0,200,232,0.1);
+  background: rgba(0,200,232,0.1);
+  border: 1px solid rgba(0,200,232,0.38);
+  color: #55ddff;
+  box-shadow: 0 4px 20px rgba(0,200,232,0.15), inset 0 0 16px rgba(0,200,232,0.04);
 }
 
 .top-notif.miss {
-  background: rgba(224,54,110,0.12);
-  border: 1px solid rgba(224,54,110,0.4);
-  color: #ff7aa8;
-  box-shadow: 0 0 20px rgba(224,54,110,0.2);
+  background: rgba(220,50,80,0.14);
+  border: 1px solid rgba(220,50,80,0.42);
+  color: #ff7090;
+  box-shadow: 0 4px 24px rgba(220,50,80,0.2), inset 0 0 20px rgba(220,50,80,0.05);
 }
 
 .top-notif.bonus {
-  background: rgba(212,168,67,0.12);
+  background: rgba(212,168,67,0.14);
   border: 1px solid rgba(212,168,67,0.5);
   color: var(--gold-bright);
-  box-shadow: 0 0 25px rgba(212,168,67,0.3);
-  font-size: 14px;
+  box-shadow: 0 4px 28px rgba(212,168,67,0.25), inset 0 0 24px rgba(212,168,67,0.06);
 }
 
-.notif-icon { font-size: 16px; }
+.notif-icon {
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 6px currentColor);
+}
+
+.notif-text {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  line-height: 1.3;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 #leaderboard-wrap {
   width: 100%;
@@ -1158,42 +1250,6 @@ body {
   animation: breathe 1.5s ease-in-out infinite;
 }
 
-#hsBar {
-  position: absolute;
-  top: 22px;
-  left: 22px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  pointer-events: none;
-}
-
-#hsLabel {
-  font-size: 9px;
-  letter-spacing: 2px;
-  color: var(--text-dim);
-  text-transform: uppercase;
-}
-
-#hsVal {
-  font-family: 'Cinzel', serif;
-  font-size: 22px;
-  font-weight: 400;
-  color: var(--gold-dim);
-  line-height: 1;
-  transition: color 0.3s;
-}
-
-#hsVal.beating {
-  color: var(--gold-bright);
-  text-shadow: 0 0 20px var(--gold);
-  animation: hsBeat 0.5s ease;
-}
-
-@keyframes hsBeat {
-  0%,100% { transform: scale(1); }
-  50%      { transform: scale(1.12); }
-}
 
 #newRecordBadge {
   display: none;
@@ -1747,20 +1803,28 @@ document.addEventListener('click',function(e){
   <div id="freezeTimer">🧊 تجميد نشط</div>
 
   <div id="ui">
-    <div id="hsBar"><div id="hsLabel" data-i18n="best">BEST</div><div id="hsVal">—</div></div>
     <div id="hud-top">
+      <!-- LEFT: BEST -->
+      <div id="hsBar">
+        <div id="hsLabel" data-i18n="best">BEST</div>
+        <div id="hsVal">—</div>
+      </div>
+
+      <!-- CENTER: SCORE -->
       <div id="score-block">
         <div id="scoreLabel" data-i18n="score">النقاط</div>
         <div id="score">0</div>
-        <div id="levelBadge">
-          <span>LVL</span>
-          <span id="levelNum">1</span>
-        </div>
+        <div id="streakBar"></div>
+      </div>
+
+      <!-- RIGHT: LEVEL -->
+      <div id="levelBadge">
+        <span data-i18n="levelLabel">LVL</span>
+        <span id="levelNum">1</span>
         <div id="progressWrap">
           <div id="progressTrack"><div id="progressFill"></div></div>
         </div>
         <div id="healthBar"></div>
-        <div id="streakBar"></div>
       </div>
     </div>
 
@@ -2374,17 +2438,39 @@ function renderStreak() {
 }
 
 /* ══════════════════════ TOP NOTIF ══════════════════════ */
+/* ══ NOTIFICATION SYSTEM ══ */
+let _notifQueue = [];
+let _notifActive = false;
+const NOTIF_MAX = 2; // max visible at once
+
 function showTopNotif(icon, text, cls) {
+  const container = document.getElementById('topNotifs');
+
+  /* Remove oldest if already at max */
+  const existing = container.querySelectorAll('.top-notif.show');
+  if (existing.length >= NOTIF_MAX) {
+    const oldest = existing[0];
+    oldest.classList.remove('show');
+    oldest.classList.add('hide');
+    setTimeout(() => oldest.remove(), 300);
+  }
+
   const el = document.createElement('div');
   el.className = 'top-notif ' + cls;
-  el.innerHTML = `<span class="notif-icon">${icon}</span><span>${text}</span>`;
-  const container = document.getElementById('topNotifs');
+  el.innerHTML = `<span class="notif-icon">${icon}</span><span class="notif-text">${text}</span>`;
   container.appendChild(el);
-  requestAnimationFrame(() => el.classList.add('show'));
+
+  /* Animate in */
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => el.classList.add('show'));
+  });
+
+  /* Auto dismiss */
   setTimeout(() => {
+    el.classList.remove('show');
     el.classList.add('hide');
-    setTimeout(() => el.remove(), 400);
-  }, 2500);
+    setTimeout(() => el.remove(), 300);
+  }, 2800);
 }
 
 /* showToast — replaced by top notification bar */
@@ -3055,7 +3141,7 @@ function gameOver() {
   document.getElementById('pauseModal').classList.remove('show');
   checkNewRecord();
   const acc=totalAttempts>0?Math.round(totalHits/totalAttempts*100):0;
-  document.getElementById('finalScore').textContent=score;
+  document.getElementById('finalScore').textContent=score.toLocaleString('en-US');
   document.getElementById('maxCombo').textContent=maxCombo;
   document.getElementById('finalLevel').textContent=level;
   document.getElementById('accuracy').textContent=acc+'%';
@@ -3109,7 +3195,7 @@ function checkHit() {
     closest.active=false; totalHits++;
     perfectStreak++;
     const pts=25*(1+Math.floor(combo/10))*mult;
-    score+=pts; scoreEl.textContent=score;
+    score+=pts; scoreEl.textContent=score.toLocaleString('en-US');
     combo++; if(combo>maxCombo)maxCombo=combo;
     if(combo>1){comboEl.textContent='×'+combo; comboCont.classList.add('show');}
     if(perfectStreak>=STREAK_NEED){ perfectStreak=0; gainHeart(); showTopNotif('❤️', t('streakHeart'), 'heart'); }
@@ -3126,7 +3212,7 @@ function checkHit() {
     closest.active=false; totalHits++;
     perfectStreak=0; renderStreak();
     const pts=12*(1+Math.floor(combo/10))*mult;
-    score+=pts; scoreEl.textContent=score;
+    score+=pts; scoreEl.textContent=score.toLocaleString('en-US');
     combo++; if(combo>maxCombo)maxCombo=combo;
     if(combo>1){comboEl.textContent='×'+combo; comboCont.classList.add('show');}
     explode(closest.x,closest.y,closest.col.main,'good');
@@ -3323,7 +3409,7 @@ function loop(ts) {
     if (result === 'exploded') {
       const pen = Math.min(score, 100);
       score = Math.max(0, score - pen);
-      scoreEl.textContent = score;
+      scoreEl.textContent = score.toLocaleString('en-US');
       shakeAmt = (typeof S !== "undefined" && !S.shake) ? 0 : 12;
       playSound('miss');
       showFB('💀 -100', 'miss');
@@ -3766,7 +3852,7 @@ function renderLeaderboard(entries) {
       <span class="lb-rank ${rankCls[i]||'rn'}">${rankIcons[i]||'#'+(i+1)}</span>
       <span class="lb-name">${escHtml(e.name)}</span>
       <span class="lb-diff ${e.diff||'easy'}">${diffLabel(e.diff)}</span>
-      <span class="lb-score">${e.score.toLocaleString()}</span>
+      <span class="lb-score">${e.score.toLocaleString('en-US')}</span>
     </div>`).join('');
 }
 
@@ -3822,7 +3908,8 @@ async function trimLeaderboard() {
 function updateHSBar() {
   const el = document.getElementById('hsVal');
   if (!el) return;
-  if (localHighScore > 0) el.textContent = localHighScore.toLocaleString();
+  /* Always display numbers in English (LTR) regardless of language */
+  if (localHighScore > 0) el.textContent = localHighScore.toLocaleString('en-US');
   if (gameRunning && score > localHighScore && localHighScore > 0) {
     el.classList.add('beating');
   } else {
@@ -3848,7 +3935,7 @@ const LANGS = {
   ar: {
     dir: 'rtl',
     subtitle: 'BOOM · SPACE',
-    startBtn: 'ابدأ اللعب',
+    startBtn: 'ابدأ اللعب', levelLabel: 'LVL',
     easy: 'سهل', normal: 'متوسط', hard: 'صعب',
     bestPlayers: 'أفضل اللاعبين',
     score: 'النقاط', best: 'BEST',
@@ -3893,7 +3980,7 @@ const LANGS = {
     paused:'PAUSED', pauseSub:'اللعبة متوقفة مؤقتاً', resume:'▶ استمرار', exitMenu:'✕ الخروج للقائمة',
   },
   en: {
-    dir: 'ltr', subtitle: 'BOOM · SPACE', startBtn: 'PLAY',
+    dir: 'ltr', subtitle: 'BOOM · SPACE', startBtn: 'PLAY', levelLabel: 'LVL',
     easy: 'Easy', normal: 'Normal', hard: 'Hard',
     bestPlayers: 'Top Players', score: 'SCORE', best: 'BEST',
     tapHint: 'Tap when the orb reaches the ring',
@@ -3929,7 +4016,7 @@ const LANGS = {
     paused:'PAUSED', pauseSub:'Game is paused', resume:'▶ Resume', exitMenu:'✕ Exit to Menu',
   },
   fr: {
-    dir: 'ltr', subtitle: 'BOOM · ESPACE', startBtn: 'JOUER',
+    dir: 'ltr', subtitle: 'BOOM · ESPACE', startBtn: 'JOUER', levelLabel: 'LVL',
     easy: 'Facile', normal: 'Moyen', hard: 'Difficile',
     bestPlayers: 'Meilleurs joueurs', score: 'SCORE', best: 'BEST',
     tapHint: "Appuyez quand l'orbe atteint le cercle",
@@ -3961,7 +4048,7 @@ const LANGS = {
     settParticles:'Effets visuels', settParticlesDesc:'Particules',
   },
   es: {
-    dir: 'ltr', subtitle: 'BOOM · ESPACIO', startBtn: 'JUGAR',
+    dir: 'ltr', subtitle: 'BOOM · ESPACIO', startBtn: 'JUGAR', levelLabel: 'LVL',
     easy: 'Fácil', normal: 'Normal', hard: 'Difícil',
     bestPlayers: 'Mejores jugadores', score: 'PUNTOS', best: 'MEJOR',
     tapHint: 'Toca cuando el orbe llegue al círculo',
@@ -3994,7 +4081,7 @@ const LANGS = {
     settParticles: 'Efectos visuales', settParticlesDesc: 'Partículas y explosiones',
   },
   zh: {
-    dir: 'ltr', subtitle: 'BOOM · 太空', startBtn: '开始游戏',
+    dir: 'ltr', subtitle: 'BOOM · 太空', startBtn: '开始游戏', levelLabel: 'LVL',
     easy: '简单', normal: '普通', hard: '困难',
     bestPlayers: '最佳玩家', score: '分数', best: '最高',
     tapHint: '当球到达圆圈时点击', shieldActive: '🛡 护盾激活',
@@ -4027,7 +4114,7 @@ const LANGS = {
     settParticles: '视觉效果', settParticlesDesc: '粒子和爆炸效果',
   },
   de: {
-    dir: 'ltr', subtitle: 'BOOM · WELTRAUM', startBtn: 'SPIELEN',
+    dir: 'ltr', subtitle: 'BOOM · WELTRAUM', startBtn: 'SPIELEN', levelLabel: 'LVL',
     easy: 'Leicht', normal: 'Mittel', hard: 'Schwer',
     bestPlayers: 'Top Spieler', score: 'PUNKTE', best: 'BEST',
     tapHint: 'Tippe wenn der Orb den Ring erreicht',
