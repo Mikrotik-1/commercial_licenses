@@ -379,17 +379,17 @@ body {
 }
 
 .orb-preview {
-  width: 55px; height: 55px;
+  width: 90px; height: 90px;
   border-radius: 50%;
-  background: radial-gradient(circle at 32% 28%, #fff 0%, var(--cyan) 25%, #003850 80%, #000 100%);
-  box-shadow: 0 0 0 1px rgba(0,200,232,0.3), 0 0 30px var(--cyan), 0 0 60px rgba(0,200,232,0.3);
   margin: 0 auto 28px;
   animation: orbFloat 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 18px rgba(80,160,255,0.7)) drop-shadow(0 0 40px rgba(0,180,255,0.4));
+  position: relative;
 }
 
 @keyframes orbFloat {
-  0%,100% { transform: translateY(0) scale(1); box-shadow: 0 0 0 1px rgba(0,200,232,0.3), 0 0 30px var(--cyan), 0 0 60px rgba(0,200,232,0.3); }
-  50%      { transform: translateY(-8px) scale(1.06); box-shadow: 0 0 0 1px rgba(0,200,232,0.5), 0 0 50px var(--cyan), 0 0 90px rgba(0,200,232,0.4); }
+  0%,100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 18px rgba(80,160,255,0.7)) drop-shadow(0 0 40px rgba(0,180,255,0.4)); }
+  50%      { transform: translateY(-10px) scale(1.05); filter: drop-shadow(0 0 28px rgba(80,200,255,0.9)) drop-shadow(0 0 60px rgba(0,200,255,0.6)); }
 }
 
 .card {
@@ -707,36 +707,6 @@ body {
   min-height: 22px;
 }
 
-#powerupToast {
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%) scale(0.7);
-  opacity: 0;
-  background: rgba(2,2,14,0.95);
-  border: 1px solid rgba(212,168,67,0.5);
-  border-radius: 20px;
-  padding: 22px 40px;
-  text-align: center;
-  z-index: 25;
-  pointer-events: none;
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 0 60px rgba(212,168,67,0.25), inset 0 0 40px rgba(212,168,67,0.04);
-}
-
-#powerupToast::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 20%; right: 20%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
-}
-
-#powerupToast.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-
-#toastIcon { font-size: 40px; display: block; margin-bottom: 8px; }
-#toastTitle { font-family: 'Cinzel', serif; font-size: 20px; color: var(--gold-bright); font-weight: 700; letter-spacing: 2px; }
-#toastDesc { font-size: 12px; color: #888; margin-top: 6px; letter-spacing: 1px; }
-
 /* FIX: single z-index declaration for helpBtn */
 #helpBtn {
   position: absolute;
@@ -998,6 +968,14 @@ body {
   border: 1px solid rgba(224,54,110,0.4);
   color: #ff7aa8;
   box-shadow: 0 0 20px rgba(224,54,110,0.2);
+}
+
+.top-notif.bonus {
+  background: rgba(212,168,67,0.12);
+  border: 1px solid rgba(212,168,67,0.5);
+  color: var(--gold-bright);
+  box-shadow: 0 0 25px rgba(212,168,67,0.3);
+  font-size: 14px;
 }
 
 .notif-icon { font-size: 16px; }
@@ -1516,32 +1494,51 @@ input[type=range].vslider::-webkit-slider-thumb {
 #sClose:hover { background:rgba(155,89,245,0.22); box-shadow:0 0 25px rgba(155,89,245,0.35); }
 
 #gameOverScreen, #levelUpScreen { 
-  display: none !important; 
-  pointer-events: none; 
+  display: none; 
+  pointer-events: none;
+  z-index: 0;
 }
 
-#gameOverScreen.visible, #levelUpScreen.visible { 
-  display: flex !important; 
+#gameOverScreen.visible {
+  display: flex !important;
   pointer-events: auto !important;
-  z-index: 25;
-  touch-action: auto;
+  z-index: 100 !important;
+  touch-action: auto !important;
+  position: absolute !important;
+  top: 0 !important; left: 0 !important;
+  width: 100% !important; height: 100% !important;
+}
+
+#levelUpScreen.visible {
+  display: flex !important;
+  pointer-events: auto !important;
+  z-index: 100 !important;
+  touch-action: auto !important;
+  position: absolute !important;
+  top: 0 !important; left: 0 !important;
+  width: 100% !important; height: 100% !important;
+}
+
+#gameOverScreen.visible * {
+  pointer-events: auto !important;
+  touch-action: auto !important;
 }
 
 #gameOverScreen.visible .btn-main,
 #gameOverScreen.visible #submitScore,
 #gameOverScreen.visible #playerNameInput {
-  pointer-events: auto;
-  touch-action: auto;
   cursor: pointer;
   position: relative;
-  z-index: 26;
-  -webkit-tap-highlight-color: rgba(255,255,255,0.15);
+  z-index: 101 !important;
+  -webkit-tap-highlight-color: rgba(255,255,255,0.2);
+  min-height: 48px;
 }
 
 /* ══ PAUSE BUTTON ══ */
 #pauseBtn {
   position: absolute;
-  top: 18px; left: 50%; transform: translateX(-50%);
+  bottom: 28px;
+  right: 80px;
   width: 44px; height: 44px;
   border-radius: 50%;
   background: rgba(255,255,255,0.06);
@@ -1560,7 +1557,7 @@ input[type=range].vslider::-webkit-slider-thumb {
 #pauseBtn:hover {
   background: rgba(255,255,255,0.14);
   border-color: rgba(255,255,255,0.4);
-  transform: translateX(-50%) scale(1.1);
+  transform: scale(1.1);
 }
 #pauseBtn.visible { display: flex; }
 
@@ -1875,12 +1872,6 @@ document.addEventListener('click',function(e){
     </div>
   </div>
 
-  <div id="powerupToast">
-    <span id="toastIcon">⭐</span>
-    <div id="toastTitle">بونص!</div>
-    <div id="toastDesc"></div>
-  </div>
-
   <!-- START SCREEN -->
   <div id="startScreen" class="screen screen-bg">
     <div id="langSwitcher">
@@ -1924,7 +1915,90 @@ document.addEventListener('click',function(e){
     </div>
     <div class="game-title">BOOM</div>
     <div class="game-subtitle" data-i18n="subtitle">BOOM · SPACE</div>
-    <div class="orb-preview"></div>
+    <div class="orb-preview">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+        <defs>
+          <!-- Ocean base -->
+          <radialGradient id="earthBase" cx="38%" cy="32%" r="65%">
+            <stop offset="0%" stop-color="#4fc3f7"/>
+            <stop offset="40%" stop-color="#0288d1"/>
+            <stop offset="75%" stop-color="#01579b"/>
+            <stop offset="100%" stop-color="#002244"/>
+          </radialGradient>
+          <!-- Atmosphere glow -->
+          <radialGradient id="atmoGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="72%" stop-color="transparent"/>
+            <stop offset="85%" stop-color="rgba(100,200,255,0.25)"/>
+            <stop offset="100%" stop-color="rgba(80,180,255,0.5)"/>
+          </radialGradient>
+          <!-- Specular highlight -->
+          <radialGradient id="specular" cx="32%" cy="28%" r="40%">
+            <stop offset="0%" stop-color="rgba(255,255,255,0.55)"/>
+            <stop offset="60%" stop-color="rgba(255,255,255,0.08)"/>
+            <stop offset="100%" stop-color="transparent"/>
+          </radialGradient>
+          <!-- Dark side shadow -->
+          <radialGradient id="shadow" cx="75%" cy="65%" r="55%">
+            <stop offset="0%" stop-color="rgba(0,0,20,0.7)"/>
+            <stop offset="100%" stop-color="transparent"/>
+          </radialGradient>
+          <clipPath id="earthClip">
+            <circle cx="50" cy="50" r="47"/>
+          </clipPath>
+        </defs>
+
+        <!-- Atmosphere outer glow -->
+        <circle cx="50" cy="50" r="50" fill="rgba(80,160,255,0.18)"/>
+        <circle cx="50" cy="50" r="49" fill="rgba(60,140,255,0.12)"/>
+
+        <!-- Ocean base -->
+        <circle cx="50" cy="50" r="47" fill="url(#earthBase)"/>
+
+        <!-- Continents group clipped to sphere -->
+        <g clip-path="url(#earthClip)">
+          <!-- Africa + Europe -->
+          <ellipse cx="54" cy="42" rx="9" ry="14" fill="#2e7d32" opacity="0.92"/>
+          <ellipse cx="51" cy="33" rx="5" ry="6" fill="#388e3c" opacity="0.85"/>
+          <!-- Africa horn -->
+          <ellipse cx="60" cy="50" rx="3" ry="5" fill="#2e7d32" opacity="0.8"/>
+
+          <!-- Americas -->
+          <ellipse cx="28" cy="36" rx="5" ry="9" fill="#388e3c" opacity="0.88"/>
+          <ellipse cx="30" cy="50" rx="5.5" ry="10" fill="#2e7d32" opacity="0.85"/>
+          <ellipse cx="33" cy="62" rx="4" ry="7" fill="#1b5e20" opacity="0.8"/>
+
+          <!-- Asia -->
+          <ellipse cx="70" cy="36" rx="13" ry="9" fill="#2e7d32" opacity="0.88"/>
+          <ellipse cx="78" cy="42" rx="6" ry="5" fill="#388e3c" opacity="0.75"/>
+
+          <!-- Australia -->
+          <ellipse cx="76" cy="60" rx="6" ry="4.5" fill="#388e3c" opacity="0.82"/>
+
+          <!-- Antarctica -->
+          <ellipse cx="50" cy="90" rx="20" ry="8" fill="#e0f7fa" opacity="0.7"/>
+
+          <!-- Greenland / Arctic -->
+          <ellipse cx="38" cy="18" rx="6" ry="4" fill="#e0f7fa" opacity="0.65"/>
+          <ellipse cx="68" cy="20" rx="8" ry="3.5" fill="#e0f7fa" opacity="0.5"/>
+
+          <!-- Cloud wisps -->
+          <ellipse cx="42" cy="28" rx="10" ry="3" fill="rgba(255,255,255,0.55)" opacity="0.8"/>
+          <ellipse cx="63" cy="55" rx="9" ry="2.5" fill="rgba(255,255,255,0.5)" opacity="0.75"/>
+          <ellipse cx="30" cy="60" rx="7" ry="2" fill="rgba(255,255,255,0.45)" opacity="0.7"/>
+          <ellipse cx="55" cy="70" rx="11" ry="2.5" fill="rgba(255,255,255,0.4)" opacity="0.65"/>
+          <ellipse cx="48" cy="45" rx="6" ry="2" fill="rgba(255,255,255,0.35)" opacity="0.6"/>
+
+          <!-- Dark side shadow overlay -->
+          <circle cx="50" cy="50" r="47" fill="url(#shadow)"/>
+        </g>
+
+        <!-- Atmosphere rim -->
+        <circle cx="50" cy="50" r="47" fill="url(#atmoGlow)" stroke="rgba(100,200,255,0.4)" stroke-width="1"/>
+
+        <!-- Specular highlight -->
+        <circle cx="50" cy="50" r="47" fill="url(#specular)"/>
+      </svg>
+    </div>
     <div id="leaderboard-wrap">
       <div id="lb-header">
         <span class="lb-icon">🏆</span>
@@ -2033,7 +2107,6 @@ const healthBarEl= document.getElementById('healthBar');
 const streakBarEl= document.getElementById('streakBar');
 const shieldOverlay= document.getElementById('shieldOverlay');
 const shieldTimerEl= document.getElementById('shieldTimer');
-const powerupToast = document.getElementById('powerupToast');
 const startScreen  = document.getElementById('startScreen');
 const gameOverScreen= document.getElementById('gameOverScreen');
 const levelUpScreen = document.getElementById('levelUpScreen');
@@ -2048,7 +2121,7 @@ let speed = 1.5, spawnRate = 2200, orbRadius = 18;
 let lastSpawn = 0, lastBonusSpawn = 0;
 let particles = [], orbs = [], bonusOrbs = [], rings = [];
 let totalHits = 0, totalAttempts = 0;
-let shakeAmt = 0, globalPulse = 0;
+let shakeAmt = 0, globalPulse = 0, earthSpin = 0;
 let difficulty = 'easy';
 let perfectStreak = 0;
 let shieldActive = false, shieldLeft = 0;
@@ -2076,7 +2149,14 @@ const PALETTE = [
   { main: '#e0366e', dark: '#6e1535', glow: 'rgba(224,54,110,0.9)' },
   { main: '#d4a843', dark: '#8a6a20', glow: 'rgba(212,168,67,0.9)' },
   { main: '#9b59f5', dark: '#4a1a8a', glow: 'rgba(155,89,245,0.9)' },
-  { main: '#3de08a', dark: '#1a6a40', glow: 'rgba(61,224,138,0.9)' }
+  { main: '#3de08a', dark: '#1a6a40', glow: 'rgba(61,224,138,0.9)' },
+  { main: '#ff6b35', dark: '#8a2a00', glow: 'rgba(255,107,53,0.9)' },
+  { main: '#ff3cac', dark: '#7a005a', glow: 'rgba(255,60,172,0.9)' },
+  { main: '#f7ff00', dark: '#7a7a00', glow: 'rgba(247,255,0,0.9)'  },
+  { main: '#00ffcc', dark: '#006655', glow: 'rgba(0,255,204,0.9)'  },
+  { main: '#ff4444', dark: '#7a0000', glow: 'rgba(255,68,68,0.9)'  },
+  { main: '#a855f7', dark: '#4a1a7a', glow: 'rgba(168,85,247,0.9)' },
+  { main: '#f97316', dark: '#7a3200', glow: 'rgba(249,115,22,0.9)' },
 ];
 
 const POWERUPS = [
@@ -2198,18 +2278,12 @@ function showTopNotif(icon, text, cls) {
   }, 2500);
 }
 
-/* ══════════════════════ TOAST ══════════════════════ */
+/* showToast — replaced by top notification bar */
 let toastTimer = null;
 function showToast(pw) {
   if (!pw) return;
-  document.getElementById('toastIcon').textContent  = pw.icon || '⭐';
-  document.getElementById('toastTitle').textContent = pw.title || 'Bonus';
-  document.getElementById('toastDesc').textContent  = pw.desc || '';
-  powerupToast.style.borderColor = (pw.color || '#d4a843') + 'aa';
-  powerupToast.style.boxShadow = `0 0 60px ${pw.color}44, inset 0 0 40px ${pw.color}08`;
-  powerupToast.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => powerupToast.classList.remove('show'), 2200);
+  // استخدم showTopNotif بدل المربع
+  showTopNotif(pw.icon || '⭐', pw.title + (pw.desc ? ' — ' + pw.desc : ''), 'bonus');
 }
 
 /* ══════════════════════ FEEDBACK ══════════════════════ */
@@ -2712,7 +2786,6 @@ function checkLevel() {
     gamePaused=true;
     document.getElementById('pauseBtn').classList.remove('visible');
     document.getElementById('newLevel').textContent=level;
-    levelUpScreen.style.cssText='';
     levelUpScreen.classList.add('visible');
     setTimeout(triggerBoom, 80);
   }
@@ -2720,7 +2793,6 @@ function checkLevel() {
 
 function continueGame() {
   levelUpScreen.classList.remove('visible');
-  levelUpScreen.style.cssText = '';
   document.getElementById('pauseBtn').classList.add('visible');
   document.getElementById('pauseBtn').textContent = '⏸';
   gamePaused = false;
@@ -2737,120 +2809,85 @@ function setDifficulty(d, el) {
   el.classList.add('active');
 }
 
-function startGame() {
-  document.getElementById('helpBtn').style.display='none';
-  document.getElementById('pauseBtn').classList.add('visible');
-  document.getElementById('pauseBtn').textContent = '⏸';
-  startScreen.style.display='none';
-  gameOverScreen.classList.remove('visible');
-  gameOverScreen.style.cssText='';
-  levelUpScreen.classList.remove('visible');
-  levelUpScreen.style.cssText='';
-
+/* ── helper: reset game state ── */
+function _resetState() {
   gameRunning=true; gamePaused=false;
   score=0; level=1; combo=0; maxCombo=0;
   perfectStreak=0; shieldActive=false; shieldLeft=0;
   doublePoints=false; doubleEnd=0; doubleNotified=false; levelHeartGiven=false;
-
+  earthSpin=0;
   const d=DIFF[difficulty];
   health=d.hp; maxHealth=d.hp;
   speed=d.speed; spawnRate=d.rate; orbRadius=d.orb;
-
   orbs=[]; bonusOrbs=[]; dangerOrbs=[]; particles=[]; rings=[];
-  lastDangerSpawn=Date.now();
-  totalHits=0; totalAttempts=0;
-  shakeAmt=0; globalPulse=0;
-
+  lastSpawn=Date.now(); lastBonusSpawn=Date.now(); lastDangerSpawn=Date.now();
+  totalHits=0; totalAttempts=0; shakeAmt=0; globalPulse=0;
   shieldOverlay.classList.remove('active');
   shieldTimerEl.classList.remove('show');
-
-  scoreEl.textContent='0';
-  levelNumEl.textContent='1';
+  scoreEl.textContent='0'; levelNumEl.textContent='1';
   progressFill.style.width='0%';
   renderHearts(); renderStreak();
   comboCont.classList.remove('show');
-  instructions.style.display='block'; instructions.textContent=t('tapHint');
+  instructions.style.display='block';
   setTimeout(()=>{ instructions.style.display='none'; },6000);
+}
 
-  lastSpawn=Date.now(); lastBonusSpawn=Date.now(); lastDangerSpawn=Date.now();
-  beatCount = 0; startMusic();
+/* ── helper: hide all screens ── */
+function _hideAllScreens() {
+  startScreen.classList.remove('screen-active');
+  startScreen.style.display = 'none';
+  gameOverScreen.classList.remove('visible');
+  levelUpScreen.classList.remove('visible');
+  document.getElementById('newRecordBadge').classList.remove('show');
+  document.getElementById('nameInputWrap').classList.remove('show');
+}
+
+function startGame() {
+  _hideAllScreens();
+  document.getElementById('helpBtn').style.display='none';
+  document.getElementById('pauseBtn').classList.add('visible');
+  document.getElementById('pauseBtn').textContent='⏸';
+  _resetState();
+  beatCount=0; startMusic();
   loadLeaderboard();
   requestAnimationFrame(loop);
 }
 
 function restartGame() {
-  // Hide game over screen completely
-  gameOverScreen.classList.remove('visible');
-  gameOverScreen.style.cssText = '';
-
-  document.getElementById('newRecordBadge').classList.remove('show');
-  document.getElementById('newRecordBadge').style.display = 'none';
-  document.getElementById('nameInputWrap').classList.remove('show');
-  document.getElementById('nameInputWrap').style.display = 'none';
-  document.getElementById('playerNameInput').value = '';
-  document.getElementById('submitScore').textContent = t('submitScore');
-  document.getElementById('submitScore').disabled = false;
-
-  // Stop any existing loop
-  gameRunning = false;
-  gamePaused = false;
+  // مش هنستنى — هنوقف اللعبة القديمة فوراً وهنبدأ من جديد
+  gameRunning=false;
+  gamePaused=false;
   stopMusic();
 
-  // Small delay so the previous loop definitely stops
-  setTimeout(() => {
-    gameRunning = true;
-    gamePaused = false;
-    score = 0; level = 1; combo = 0; maxCombo = 0;
-    perfectStreak = 0; shieldActive = false; shieldLeft = 0;
-    doublePoints = false; doubleEnd = 0; doubleNotified = false; levelHeartGiven = false;
+  _hideAllScreens();
+  document.getElementById('playerNameInput').value='';
+  document.getElementById('submitScore').textContent=t('submitScore');
+  document.getElementById('submitScore').disabled=false;
+  document.getElementById('pauseBtn').classList.add('visible');
+  document.getElementById('pauseBtn').textContent='⏸';
 
-    const d = DIFF[difficulty];
-    health = d.hp; maxHealth = d.hp;
-    speed = d.speed; spawnRate = d.rate; orbRadius = d.orb;
-
-    orbs = []; bonusOrbs = []; dangerOrbs = []; particles = []; rings = [];
-    lastSpawn = Date.now(); lastBonusSpawn = Date.now(); lastDangerSpawn = Date.now();
-    totalHits = 0; totalAttempts = 0;
-    shakeAmt = 0; globalPulse = 0;
-
-    shieldOverlay.classList.remove('active');
-    shieldTimerEl.classList.remove('show');
-
-    scoreEl.textContent = '0';
-    levelNumEl.textContent = '1';
-    progressFill.style.width = '0%';
-    renderHearts(); renderStreak();
-    comboCont.classList.remove('show');
-
-    instructions.style.display = 'block';
-    setTimeout(() => { instructions.style.display = 'none'; }, 6000);
-
-    // Show pause button
-    document.getElementById('pauseBtn').classList.add('visible');
-
-    beatCount = 0;
-    startMusic();
-    requestAnimationFrame(loop);
-  }, 50);
+  // نفس الـ frame — مش setTimeout عشان متبقاش فجوة
+  _resetState();
+  beatCount=0;
+  startMusic();
+  requestAnimationFrame(loop);
 }
 
 /* ══ PAUSE SYSTEM ══ */
 function pauseGame() {
   if (!gameRunning || gamePaused) return;
-  gamePaused = true;
+  gamePaused=true;
   stopMusic();
   document.getElementById('pauseModal').classList.add('show');
-  document.getElementById('pauseBtn').textContent = '▶';
+  document.getElementById('pauseBtn').textContent='▶';
 }
 
 function resumeGame() {
   if (!gameRunning || !gamePaused) return;
   document.getElementById('pauseModal').classList.remove('show');
-  document.getElementById('pauseBtn').textContent = '⏸';
-  gamePaused = false;
-  lastSpawn = Date.now();
-  lastBonusSpawn = Date.now();
-  lastDangerSpawn = Date.now();
+  document.getElementById('pauseBtn').textContent='⏸';
+  gamePaused=false;
+  lastSpawn=Date.now(); lastBonusSpawn=Date.now(); lastDangerSpawn=Date.now();
   if (S.music) startMusic();
   requestAnimationFrame(loop);
 }
@@ -2861,46 +2898,34 @@ function exitToMenu() {
 }
 
 function showMenu() {
+  gameRunning=false; gamePaused=false;
+  stopMusic();
+  _hideAllScreens();
   document.getElementById('helpBtn').style.display='flex';
   document.getElementById('pauseBtn').classList.remove('visible');
-  document.getElementById('pauseBtn').textContent = '⏸';
+  document.getElementById('pauseBtn').textContent='⏸';
   document.getElementById('pauseModal').classList.remove('show');
-  stopMusic();
-  gameRunning=false; gamePaused=false;
   startScreen.style.display='flex';
-  gameOverScreen.classList.remove('visible');
-  gameOverScreen.style.cssText = '';
-  levelUpScreen.classList.remove('visible');
-  levelUpScreen.style.cssText = '';
-  document.getElementById('newRecordBadge').classList.remove('show');
-  document.getElementById('newRecordBadge').style.display = 'none';
-  document.getElementById('nameInputWrap').classList.remove('show');
-  document.getElementById('nameInputWrap').style.display = 'none';
   loadLeaderboard();
 }
 
 function gameOver() {
-  gameRunning=false;
-  gamePaused=false;
+  gameRunning=false; gamePaused=false;
   stopMusic();
   document.getElementById('pauseBtn').classList.remove('visible');
   document.getElementById('pauseModal').classList.remove('show');
   checkNewRecord();
-  const acc = totalAttempts>0 ? Math.round(totalHits/totalAttempts*100) : 0;
+  const acc=totalAttempts>0?Math.round(totalHits/totalAttempts*100):0;
   document.getElementById('finalScore').textContent=score;
   document.getElementById('maxCombo').textContent=maxCombo;
   document.getElementById('finalLevel').textContent=level;
   document.getElementById('accuracy').textContent=acc+'%';
-  gameOverScreen.style.cssText = '';
   gameOverScreen.classList.add('visible');
 }
 
 /* ══════════════════════ HIT CHECK ══════════════════════ */
 function checkHit() {
-  // Strict guard — must be actively running, not paused, not game over
-  if(!gameRunning || gamePaused) return;
-  if(gameOverScreen.classList.contains('visible')) return;
-  if(levelUpScreen.classList.contains('visible')) return;
+  if (!gameRunning || gamePaused) return;
 
   // Danger orb check first
   for (let i = dangerOrbs.length - 1; i >= 0; i--) {
@@ -3042,28 +3067,86 @@ function loop(ts) {
 
   const tp=Math.sin(globalPulse)*3;
 
+  // Outer pulse ring
   ctx.beginPath(); ctx.arc(CX,CY,110+tp,0,Math.PI*2);
   ctx.strokeStyle='rgba(155,89,245,0.12)'; ctx.lineWidth=1.5; ctx.stroke();
 
+  // Good zone ring
   ctx.beginPath(); ctx.arc(CX,CY,75+tp,0,Math.PI*2);
   ctx.strokeStyle='rgba(0,200,232,0.35)'; ctx.lineWidth=1.5;
   ctx.setLineDash([6,5]); ctx.stroke(); ctx.setLineDash([]);
 
+  // Perfect zone ring
   ctx.beginPath(); ctx.arc(CX,CY,35,0,Math.PI*2);
   ctx.strokeStyle='rgba(212,168,67,0.7)'; ctx.lineWidth=1.5;
   ctx.shadowBlur=12; ctx.shadowColor='rgba(212,168,67,0.5)';
   ctx.stroke(); ctx.shadowBlur=0;
 
-  const cg=ctx.createRadialGradient(CX,CY,0,CX,CY,60);
-  cg.addColorStop(0,'rgba(212,168,67,0.1)');
-  cg.addColorStop(0.5,'rgba(0,200,232,0.06)');
-  cg.addColorStop(1,'transparent');
-  ctx.beginPath(); ctx.arc(CX,CY,60,0,Math.PI*2);
-  ctx.fillStyle=cg; ctx.fill();
+  // ── Earth planet at center ──
+  const er = 22; // earth radius
+  earthSpin += 0.004;
 
-  ctx.beginPath(); ctx.arc(CX,CY,3,0,Math.PI*2);
-  ctx.fillStyle=`rgba(212,168,67,${0.5+0.3*Math.sin(globalPulse*2)})`;
-  ctx.shadowBlur=10; ctx.shadowColor='#d4a843'; ctx.fill(); ctx.shadowBlur=0;
+  ctx.save();
+  ctx.beginPath(); ctx.arc(CX,CY,er,0,Math.PI*2); ctx.clip();
+
+  // Ocean
+  const oc = ctx.createRadialGradient(CX-er*0.3,CY-er*0.3,0,CX,CY,er);
+  oc.addColorStop(0,'#4fc3f7'); oc.addColorStop(0.4,'#0288d1');
+  oc.addColorStop(0.8,'#01579b'); oc.addColorStop(1,'#002244');
+  ctx.fillStyle=oc; ctx.fillRect(CX-er,CY-er,er*2,er*2);
+
+  // Continents spinning
+  ctx.save(); ctx.translate(CX,CY); ctx.rotate(earthSpin);
+  const cc = [
+    [0.08,0.05,0.18,0.28,0.1,'#2e7d32',0.92],   // Africa
+    [0.04,-0.25,0.1,0.12,-0.2,'#388e3c',0.85],  // Europe
+    [0.42,-0.18,0.28,0.2,0.15,'#2e7d32',0.88],  // Asia
+    [-0.44,-0.18,0.13,0.19,-0.2,'#388e3c',0.88],// N.America
+    [-0.37,0.26,0.11,0.21,0.15,'#2e7d32',0.85], // S.America
+    [0.5,0.36,0.13,0.09,0.1,'#388e3c',0.82],    // Australia
+  ];
+  cc.forEach(([cx,cy,rx,ry,rot,col,alpha])=>{
+    ctx.beginPath(); ctx.ellipse(er*cx,er*cy,er*rx,er*ry,rot,0,Math.PI*2);
+    ctx.fillStyle=col; ctx.globalAlpha=alpha; ctx.fill();
+  });
+  // Poles
+  ctx.beginPath(); ctx.ellipse(0,er*0.82,er*0.5,er*0.13,0,0,Math.PI*2);
+  ctx.fillStyle='#e0f7fa'; ctx.globalAlpha=0.7; ctx.fill();
+  ctx.beginPath(); ctx.ellipse(0,-er*0.82,er*0.42,er*0.11,0,0,Math.PI*2);
+  ctx.fillStyle='#e0f7fa'; ctx.globalAlpha=0.6; ctx.fill();
+  ctx.globalAlpha=1;
+  // Clouds
+  ctx.rotate(-earthSpin*0.35);
+  ctx.fillStyle='rgba(255,255,255,0.5)';
+  ctx.beginPath(); ctx.ellipse(-er*0.1,-er*0.44,er*0.27,er*0.06,0.3,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(er*0.24,er*0.12,er*0.22,er*0.05,-0.2,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(er*0.1,er*0.5,er*0.24,er*0.05,-0.1,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+
+  // Dark side shadow
+  const es = ctx.createRadialGradient(CX+er*0.28,CY+er*0.22,0,CX+er*0.1,CY+er*0.1,er*1.1);
+  es.addColorStop(0,'rgba(0,0,20,0.68)'); es.addColorStop(1,'transparent');
+  ctx.fillStyle=es; ctx.globalAlpha=1; ctx.fillRect(CX-er,CY-er,er*2,er*2);
+  ctx.restore(); // end clip
+
+  // Atmosphere rim
+  const atmo = ctx.createRadialGradient(CX,CY,er*0.8,CX,CY,er*1.35);
+  atmo.addColorStop(0,'transparent');
+  atmo.addColorStop(0.6,'rgba(80,180,255,0.2)');
+  atmo.addColorStop(1,'rgba(60,140,255,0.42)');
+  ctx.beginPath(); ctx.arc(CX,CY,er*1.35,0,Math.PI*2);
+  ctx.fillStyle=atmo; ctx.globalAlpha=0.9; ctx.fill(); ctx.globalAlpha=1;
+
+  // Specular
+  ctx.beginPath();
+  ctx.ellipse(CX-er*0.32,CY-er*0.32,er*0.26,er*0.15,Math.PI/4,0,Math.PI*2);
+  ctx.fillStyle='rgba(255,255,255,0.6)'; ctx.fill();
+
+  // Glow ring
+  ctx.beginPath(); ctx.arc(CX,CY,er,0,Math.PI*2);
+  ctx.shadowBlur=18; ctx.shadowColor='rgba(60,160,255,0.9)';
+  ctx.strokeStyle='rgba(80,180,255,0.4)'; ctx.lineWidth=1;
+  ctx.stroke(); ctx.shadowBlur=0;
 
   const now=Date.now();
   if(now-lastSpawn>spawnRate){ lastSpawn=now; orbs.push(new Orb()); }
@@ -3135,30 +3218,33 @@ function loop(ts) {
 }
 
 /* ══════════════════════ INPUT ══════════════════════ */
-canvas.addEventListener('click', checkHit);
-canvas.addEventListener('touchstart', e=>{ 
-  e.preventDefault(); 
-  checkHit(); 
-}, {passive:false});
+function handleGameInput() {
+  if (!gameRunning || gamePaused) return;
+  if (gameOverScreen.classList.contains('visible')) return;
+  if (levelUpScreen.classList.contains('visible')) return;
+  if (document.getElementById('pauseModal').classList.contains('show')) return;
+  if (document.getElementById('settingsModal').classList.contains('show')) return;
+  if (document.getElementById('helpModal').classList.contains('show')) return;
+  checkHit();
+}
 
-/* Fix: only block double-tap zoom on canvas, NOT on UI buttons/inputs */
-canvas.addEventListener('touchend', e=>{ 
-  e.preventDefault(); 
-}, {passive:false});
-
-/* Allow all touches on game over screen buttons and inputs */
-document.addEventListener('touchstart', e=>{
-  const tag = e.target.tagName;
-  const isUI = e.target.closest('#gameOverScreen, #pauseModal, #settingsModal, #helpModal, #startScreen, #levelUpScreen, #nameInputWrap, #helpBtn, #pauseBtn, #settingsBtn');
-  if(isUI || tag === 'INPUT' || tag === 'BUTTON') return;
-}, {passive:true});
+canvas.addEventListener('click', handleGameInput);
+canvas.addEventListener('touchstart', e => {
+  if (e.target !== canvas) return;
+  e.preventDefault();
+  handleGameInput();
+}, { passive: false });
+canvas.addEventListener('touchend', e => {
+  if (e.target !== canvas) return;
+  e.preventDefault();
+}, { passive: false });
 
 document.addEventListener('keydown', e=>{
   if(e.code==='Space'){
     e.preventDefault();
     if(gameRunning && !gamePaused) checkHit();
     else if(gameRunning && gamePaused) resumeGame();
-    else if(startScreen.style.display!=='none') startGame();
+    else if(startScreen.style.display==='flex'||startScreen.style.display==='') startGame();
     else if(gameOverScreen.classList.contains('visible')) restartGame();
   }
   if(e.code==='Escape'){
@@ -3587,17 +3673,13 @@ function updateHSBar() {
 function checkNewRecord() {
   isNewRecord = score > localHighScore;
   if (isNewRecord) {
-    document.getElementById('newRecordBadge').style.display = 'flex';
     document.getElementById('newRecordBadge').classList.add('show');
-    document.getElementById('nameInputWrap').style.display = 'flex';
     document.getElementById('nameInputWrap').classList.add('show');
     localHighScore = score;
     updateHSBar();
   } else {
     document.getElementById('newRecordBadge').classList.remove('show');
-    document.getElementById('newRecordBadge').style.display = 'none';
     document.getElementById('nameInputWrap').classList.remove('show');
-    document.getElementById('nameInputWrap').style.display = 'none';
   }
 }
 
