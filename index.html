@@ -552,119 +552,64 @@ body {
 
 .diff-row {
   display: flex;
-  gap: 10px;
-  margin: 20px 0 26px;
+  gap: 8px;
+  margin: 16px 0 22px;
   width: 100%;
   max-width: 320px;
 }
 
 .diffBtn {
   flex: 1;
-  padding: 14px 8px 12px;
+  padding: 12px 6px 10px;
   border: 1px solid rgba(255,255,255,0.08);
   background: rgba(255,255,255,0.02);
-  border-radius: 16px;
+  border-radius: 14px;
   cursor: pointer;
   font-family: 'Tajawal', sans-serif;
-  transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
-  position: relative;
-  overflow: hidden;
+  transition: border-color 0.12s, background 0.12s;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
+  -webkit-tap-highlight-color: transparent;
+  will-change: auto;
 }
 
-.diffBtn::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 1px;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
+.diffBtn::before { display: none; }
+.diffBtn:active  { transform: scale(0.96); }
 
-.diffBtn:hover { transform: translateY(-2px); }
+/* colours */
+.diffBtn.easy-btn   { border-color: rgba(61,224,138,0.2); }
+.diffBtn.normal-btn { border-color: rgba(0,200,232,0.2);  }
+.diffBtn.hard-btn   { border-color: rgba(224,54,110,0.2); }
 
-.diffBtn.easy-btn { border-color: rgba(61,224,138,0.18); }
-.diffBtn.easy-btn::before { background: linear-gradient(90deg, transparent, #3de08a, transparent); }
-.diffBtn.easy-btn .diff-icon { color: #3de08a; text-shadow: 0 0 15px #3de08a; }
-.diffBtn.easy-btn .diff-name { color: #3de08a; }
-.diffBtn.easy-btn.active {
-  background: rgba(61,224,138,0.1);
-  border-color: rgba(61,224,138,0.5);
-  box-shadow: 0 0 25px rgba(61,224,138,0.2), inset 0 0 20px rgba(61,224,138,0.06);
-}
-.diffBtn.easy-btn.active::before { opacity: 1; }
+.diffBtn.easy-btn   .diff-icon, .diffBtn.easy-btn   .diff-name { color: #3de08a; }
+.diffBtn.normal-btn .diff-icon, .diffBtn.normal-btn .diff-name { color: var(--cyan); }
+.diffBtn.hard-btn   .diff-icon, .diffBtn.hard-btn   .diff-name { color: var(--pink); }
 
-.diffBtn.normal-btn { border-color: rgba(0,200,232,0.18); }
-.diffBtn.normal-btn::before { background: linear-gradient(90deg, transparent, var(--cyan), transparent); }
-.diffBtn.normal-btn .diff-icon { color: var(--cyan); text-shadow: 0 0 15px var(--cyan); }
-.diffBtn.normal-btn .diff-name { color: var(--cyan); }
-.diffBtn.normal-btn.active {
-  background: rgba(0,200,232,0.1);
-  border-color: rgba(0,200,232,0.5);
-  box-shadow: 0 0 25px rgba(0,200,232,0.2), inset 0 0 20px rgba(0,200,232,0.06);
-}
-.diffBtn.normal-btn.active::before { opacity: 1; }
+/* active — no box-shadow عشان ميكونش ثقيل */
+.diffBtn.easy-btn.active   { background: rgba(61,224,138,0.1);  border-color: rgba(61,224,138,0.6); }
+.diffBtn.normal-btn.active { background: rgba(0,200,232,0.1);   border-color: rgba(0,200,232,0.6);  }
+.diffBtn.hard-btn.active   { background: rgba(224,54,110,0.1);  border-color: rgba(224,54,110,0.6); }
 
-.diffBtn.hard-btn { border-color: rgba(224,54,110,0.18); }
-.diffBtn.hard-btn::before { background: linear-gradient(90deg, transparent, var(--pink), transparent); }
-.diffBtn.hard-btn .diff-icon { color: var(--pink); text-shadow: 0 0 15px var(--pink); }
-.diffBtn.hard-btn .diff-name { color: var(--pink); }
-.diffBtn.hard-btn.active {
-  background: rgba(224,54,110,0.1);
-  border-color: rgba(224,54,110,0.5);
-  box-shadow: 0 0 25px rgba(224,54,110,0.2), inset 0 0 20px rgba(224,54,110,0.06);
-}
-.diffBtn.hard-btn.active::before { opacity: 1; }
-
-.diff-icon {
-  font-size: 22px;
-  line-height: 1;
-  transition: transform 0.3s;
-}
-
-.diffBtn:hover .diff-icon { transform: scale(1.2); }
-.diffBtn.active .diff-icon { animation: diffIconPop 0.4s cubic-bezier(0.34,1.56,0.64,1); }
-
-@keyframes diffIconPop {
-  0% { transform: scale(0.7); }
-  60% { transform: scale(1.3); }
-  100% { transform: scale(1); }
-}
+.diff-icon { font-size: 20px; line-height: 1; }
 
 .diff-name {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 900;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
-  transition: all 0.3s;
 }
 
-.diff-dots {
-  display: flex;
-  gap: 3px;
-  margin-top: 2px;
-}
+.diff-dots { display: flex; gap: 3px; }
 
 .diff-dot {
   width: 5px; height: 5px;
   border-radius: 50%;
   background: currentColor;
-  opacity: 0.3;
-  transition: opacity 0.3s;
 }
-
-.diffBtn.active .diff-dot { opacity: 1; }
-.diffBtn.active .diff-dot:nth-child(1) { animation: dotPop 0.3s 0.05s both; }
-.diffBtn.active .diff-dot:nth-child(2) { animation: dotPop 0.3s 0.12s both; }
-.diffBtn.active .diff-dot:nth-child(3) { animation: dotPop 0.3s 0.19s both; }
-
-@keyframes dotPop {
-  0% { transform: scale(0); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
-}
+.diff-dot.d-on  { opacity: 1; }
+.diff-dot.d-off { opacity: 0.2; }
 
 .btn-main {
   position: relative;
@@ -2224,27 +2169,27 @@ document.addEventListener('click',function(e){
         <span class="diff-icon">🌱</span>
         <span class="diff-name" data-i18n="easy">سهل</span>
         <div class="diff-dots">
-          <div class="diff-dot"></div>
-          <div class="diff-dot" style="opacity:0.15"></div>
-          <div class="diff-dot" style="opacity:0.15"></div>
+          <div class="diff-dot d-on"></div>
+          <div class="diff-dot d-off"></div>
+          <div class="diff-dot d-off"></div>
         </div>
       </button>
       <button class="diffBtn normal-btn" onclick="setDifficulty('normal',this)">
         <span class="diff-icon">⚡</span>
         <span class="diff-name" data-i18n="normal">متوسط</span>
         <div class="diff-dots">
-          <div class="diff-dot"></div>
-          <div class="diff-dot"></div>
-          <div class="diff-dot" style="opacity:0.15"></div>
+          <div class="diff-dot d-on"></div>
+          <div class="diff-dot d-on"></div>
+          <div class="diff-dot d-off"></div>
         </div>
       </button>
       <button class="diffBtn hard-btn" onclick="setDifficulty('hard',this)">
         <span class="diff-icon">💀</span>
         <span class="diff-name" data-i18n="hard">صعب</span>
         <div class="diff-dots">
-          <div class="diff-dot"></div>
-          <div class="diff-dot"></div>
-          <div class="diff-dot"></div>
+          <div class="diff-dot d-on"></div>
+          <div class="diff-dot d-on"></div>
+          <div class="diff-dot d-on"></div>
         </div>
       </button>
     </div>
@@ -3188,9 +3133,15 @@ function continueGame() {
 }
 
 /* ══════════════════════ GAME FLOW ══════════════════════ */
+/* cache buttons once */
+const _diffBtns = [];
 function setDifficulty(d, el) {
-  difficulty=d;
-  document.querySelectorAll('.diffBtn').forEach(b=>b.classList.remove('active'));
+  difficulty = d;
+  /* Use cached list or build once */
+  if (!_diffBtns.length) {
+    document.querySelectorAll('.diffBtn').forEach(b => _diffBtns.push(b));
+  }
+  _diffBtns.forEach(b => b.classList.remove('active'));
   el.classList.add('active');
 }
 
