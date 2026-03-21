@@ -2548,14 +2548,14 @@ let _lastNotifTime = 0;
 function showTopNotif(icon, text, cls) {
   const now = Date.now();
 
-  /* منع التكرار — نفس النص في أقل من 2 ثانية */
-  if (text === _lastNotifText && now - _lastNotifTime < 2000) return;
+  /* منع التكرار — نفس النص في أقل من 3 ثوان */
+  if (text === _lastNotifText && now - _lastNotifTime < 3000) return;
   _lastNotifText = text;
   _lastNotifTime = now;
 
   const container = document.getElementById('topNotifs');
 
-  /* امسح كل الإشعارات الموجودة فوراً */
+  /* إشعار واحد بس في كل وقت — امسح القديم فوراً */
   container.innerHTML = '';
   _currentNotif = null;
   clearTimeout(_notifTimer);
@@ -2576,7 +2576,7 @@ function showTopNotif(icon, text, cls) {
     setTimeout(() => {
       if (_currentNotif === el) { el.remove(); _currentNotif = null; }
     }, 300);
-  }, 2500);
+  }, 2200);
 }
 
 /* showToast — replaced by top notification bar */
