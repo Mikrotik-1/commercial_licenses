@@ -2540,39 +2540,43 @@ function renderStreak() {
 }
 
 /* ══════════════════════ TOP NOTIF ══════════════════════ */
-/* ══ NOTIFICATION SYSTEM ══ */
-let _notifQueue = [];
-let _notifActive = false;
-const NOTIF_MAX = 2; // max visible at once
+let _notifTimer = null;
+let _currentNotif = null;
+let _lastNotifText = '';
+let _lastNotifTime = 0;
 
 function showTopNotif(icon, text, cls) {
+  const now = Date.now();
+
+  /* منع التكرار — نفس النص في أقل من 2 ثانية */
+  if (text === _lastNotifText && now - _lastNotifTime < 2000) return;
+  _lastNotifText = text;
+  _lastNotifTime = now;
+
   const container = document.getElementById('topNotifs');
 
-  /* Remove oldest if already at max */
-  const existing = container.querySelectorAll('.top-notif.show');
-  if (existing.length >= NOTIF_MAX) {
-    const oldest = existing[0];
-    oldest.classList.remove('show');
-    oldest.classList.add('hide');
-    setTimeout(() => oldest.remove(), 300);
-  }
+  /* امسح كل الإشعارات الموجودة فوراً */
+  container.innerHTML = '';
+  _currentNotif = null;
+  clearTimeout(_notifTimer);
 
   const el = document.createElement('div');
   el.className = 'top-notif ' + cls;
   el.innerHTML = `<span class="notif-icon">${icon}</span><span class="notif-text">${text}</span>`;
   container.appendChild(el);
+  _currentNotif = el;
 
-  /* Animate in */
   requestAnimationFrame(() => {
     requestAnimationFrame(() => el.classList.add('show'));
   });
 
-  /* Auto dismiss */
-  setTimeout(() => {
+  _notifTimer = setTimeout(() => {
     el.classList.remove('show');
     el.classList.add('hide');
-    setTimeout(() => el.remove(), 300);
-  }, 2800);
+    setTimeout(() => {
+      if (_currentNotif === el) { el.remove(); _currentNotif = null; }
+    }, 300);
+  }, 2500);
 }
 
 /* showToast — replaced by top notification bar */
