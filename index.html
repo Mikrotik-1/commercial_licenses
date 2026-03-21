@@ -2265,6 +2265,11 @@ let stars = [], nebulae = [], dustParts = [], meteors = [], planets = [];
 let dangerOrbs = [];
 let lastDangerSpawn = 0;
 
+/* Special orbs */
+let bombOrbs = [], lastBombSpawn = 0;
+let fastOrbs = [], lastFastSpawn = 0;
+let zigzagOrbs = [], lastZigzagSpawn = 0;
+
 /* FIX 2: doubleNotified as proper module-level variable */
 let doubleNotified = false;
 
@@ -2771,6 +2776,7 @@ class Orb {
     this.active = true;
     this.trail = [];
     this.rot = 0;
+    this.wasHit = false; /* اتضغط عليها صح */
   }
 
   update() {
@@ -2779,11 +2785,14 @@ class Orb {
     this.trail.push({x:this.x,y:this.y,alpha:1,r:r,col:this.col});
     if(this.trail.length>10) this.trail.shift();
     this.trail.forEach((t,i)=>{ t.alpha=(i/this.trail.length)*0.45; });
-    /* FREEZE: slow down movement when freeze active */
     const speedMult = freezeActive ? 0.25 : 1;
     this.x += this.vx * speedMult;
     this.y += this.vy * speedMult;
-    if(Math.hypot(this.x-CX,this.y-CY)<22){this.active=false;return'missed';}
+    if(Math.hypot(this.x-CX,this.y-CY)<22){
+      this.active=false;
+      /* لو اتضغط عليها صح مش miss */
+      return this.wasHit ? null : 'missed';
+    }
     return null;
   }
 
@@ -2870,9 +2879,10 @@ class BonusOrb {
     this.x += this.vx * speedMult;
     this.y += this.vy * speedMult;
     const dist = Math.hypot(this.x - CX, this.y - CY);
+    /* انتهت المدة أو وصلت للمنتصف — بدون عقوبة خالص */
     if (dist < 28 || Date.now() - this.born > this.ttl) {
       this.active = false;
-      return 'expired';
+      return 'expired'; /* مش 'missed' — مش بتاخد قلب */
     }
     return null;
   }
@@ -3049,6 +3059,216 @@ class DangerOrb {
   }
 }
 
+
+/* ══════════════════════ 💣 BOMB ORB ══════════════════════ */
+class BombOrb {
+  constructor() {
+    const angle = Math.random() * Math.PI * 2;
+    const dist = Math.max(W, H) * 0.65;
+    this.x = CX + Math.cos(angle) * dist;
+    this.y = CY + Math.sin(angle) * dist;
+    const spd = speed * 0.85;
+    this.vx = (CX - this.x) / dist * spd;
+    this.vy = (CY - this.y) / dist * spd;
+    this.r = orbRadius * 1.25;
+    this.pulse = Math.random() * Math.PI * 2;
+    this.active = true;
+    this.trail = [];
+    this.currentR = this.r;
+    this.rot = 0;
+  }
+
+  update() {
+    this.pulse += 0.08; this.rot += 0.03;
+    this.currentR = this.r + Math.sin(this.pulse) * 2;
+    this.trail.push({ x: this.x, y: this.y, alpha: 1, r: this.currentR });
+    if (this.trail.length > 8) this.trail.shift();
+    this.trail.forEach((t, i) => { t.alpha = (i / this.trail.length) * 0.4; });
+    const speedMult = freezeActive ? 0.25 : 1;
+    this.x += this.vx * speedMult;
+    this.y += this.vy * speedMult;
+    if (Math.hypot(this.x - CX, this.y - CY) < 22) {
+      this.active = false;
+      return 'expired'; /* فاتت بدون ضغط — مفيش عقوبة */
+    }
+    return null;
+  }
+
+  draw() {
+    const r = this.currentR;
+    /* glow */
+    ctx.beginPath(); ctx.arc(this.x, this.y, r * 2.5, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,60,0,0.07)'; ctx.fill();
+    /* trail */
+    this.trail.forEach((t, i) => {
+      const tr = r * (0.3 + (i / this.trail.length) * 0.7);
+      ctx.beginPath(); ctx.arc(t.x, t.y, tr, 0, Math.PI * 2);
+      ctx.fillStyle = '#ff4400'; ctx.globalAlpha = t.alpha * 0.4; ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+    /* body */
+    const sg = ctx.createRadialGradient(this.x - r*.3, this.y - r*.3, 0, this.x, this.y, r);
+    sg.addColorStop(0, '#fff0e0'); sg.addColorStop(0.2, '#ff6600');
+    sg.addColorStop(0.6, '#cc2200'); sg.addColorStop(1, '#440000');
+    ctx.beginPath(); ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
+    ctx.fillStyle = sg;
+    ctx.shadowBlur = 12; ctx.shadowColor = '#ff4400';
+    ctx.fill(); ctx.shadowBlur = 0;
+    /* fuse */
+    ctx.save();
+    ctx.translate(this.x, this.y - r);
+    ctx.rotate(Math.sin(this.pulse) * 0.3);
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -r * 0.8);
+    ctx.strokeStyle = '#888'; ctx.lineWidth = 1.5; ctx.stroke();
+    /* spark */
+    ctx.beginPath(); ctx.arc(0, -r * 0.8, 2.5, 0, Math.PI * 2);
+    ctx.fillStyle = Math.sin(this.pulse * 8) > 0 ? '#ffdd00' : '#ff8800';
+    ctx.shadowBlur = 8; ctx.shadowColor = '#ffaa00';
+    ctx.fill(); ctx.shadowBlur = 0;
+    ctx.restore();
+  }
+}
+
+/* ══════════════════════ ⚡ FAST ORB ══════════════════════ */
+class FastOrb {
+  constructor() {
+    const angle = Math.random() * Math.PI * 2;
+    const dist = Math.max(W, H) * 0.65;
+    this.x = CX + Math.cos(angle) * dist;
+    this.y = CY + Math.sin(angle) * dist;
+    const spd = speed * 2.4; /* ضعف السرعة */
+    this.vx = (CX - this.x) / dist * spd;
+    this.vy = (CY - this.y) / dist * spd;
+    this.r = orbRadius * 0.85; /* أصغر شوية */
+    this.pulse = Math.random() * Math.PI * 2;
+    this.active = true;
+    this.trail = [];
+    this.currentR = this.r;
+  }
+
+  update() {
+    this.pulse += 0.15;
+    this.currentR = this.r + Math.sin(this.pulse) * 1.5;
+    this.trail.push({ x: this.x, y: this.y, alpha: 1, r: this.currentR });
+    if (this.trail.length > 12) this.trail.shift();
+    this.trail.forEach((t, i) => { t.alpha = (i / this.trail.length) * 0.6; });
+    const speedMult = freezeActive ? 0.25 : 1;
+    this.x += this.vx * speedMult;
+    this.y += this.vy * speedMult;
+    if (Math.hypot(this.x - CX, this.y - CY) < 22) {
+      this.active = false;
+      return 'missed'; /* فاتت = قلب */
+    }
+    return null;
+  }
+
+  draw() {
+    const r = this.currentR;
+    /* speed lines trail */
+    this.trail.forEach((t, i) => {
+      const tr = r * (0.2 + (i / this.trail.length) * 0.8);
+      ctx.beginPath(); ctx.arc(t.x, t.y, tr, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffee00'; ctx.globalAlpha = t.alpha * 0.5; ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+    /* body */
+    const sg = ctx.createRadialGradient(this.x - r*.3, this.y - r*.3, 0, this.x, this.y, r);
+    sg.addColorStop(0, '#ffffff'); sg.addColorStop(0.15, '#ffee44');
+    sg.addColorStop(0.55, '#ffaa00'); sg.addColorStop(0.9, '#cc6600');
+    sg.addColorStop(1, '#000');
+    ctx.beginPath(); ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
+    ctx.fillStyle = sg;
+    ctx.shadowBlur = 10; ctx.shadowColor = '#ffcc00';
+    ctx.fill(); ctx.shadowBlur = 0;
+    /* specular */
+    ctx.beginPath();
+    ctx.ellipse(this.x - r*.3, this.y - r*.3, r*.22, r*.13, Math.PI/4, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fill();
+    /* ⚡ icon */
+    ctx.font = Math.round(r * 1.0) + 'px serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.globalAlpha = 0.85;
+    ctx.fillText('⚡', this.x, this.y + r * 2.0);
+    ctx.globalAlpha = 1;
+  }
+}
+
+/* ══════════════════════ 🌀 ZIGZAG ORB ══════════════════════ */
+class ZigzagOrb {
+  constructor() {
+    const angle = Math.random() * Math.PI * 2;
+    const dist = Math.max(W, H) * 0.65;
+    this.x = CX + Math.cos(angle) * dist;
+    this.y = CY + Math.sin(angle) * dist;
+    const spd = speed * 1.0;
+    this.vx = (CX - this.x) / dist * spd;
+    this.vy = (CY - this.y) / dist * spd;
+    this.r = orbRadius;
+    this.pulse = Math.random() * Math.PI * 2;
+    this.active = true;
+    this.trail = [];
+    this.currentR = this.r;
+    this.zigTimer = 0;
+    this.zigDir = 1;
+    /* perpendicular direction for zigzag */
+    const len = Math.hypot(this.vx, this.vy);
+    this.perpX = -this.vy / len;
+    this.perpY =  this.vx / len;
+  }
+
+  update() {
+    this.pulse += 0.1;
+    this.zigTimer += 0.08;
+    this.currentR = this.r + Math.sin(this.pulse) * 2;
+    /* zigzag motion — يتأرجح يمين وشمال */
+    const zigAmt = Math.sin(this.zigTimer * 2.5) * 2.2;
+    this.trail.push({ x: this.x, y: this.y, alpha: 1, r: this.currentR });
+    if (this.trail.length > 10) this.trail.shift();
+    this.trail.forEach((t, i) => { t.alpha = (i / this.trail.length) * 0.45; });
+    const speedMult = freezeActive ? 0.25 : 1;
+    this.x += (this.vx + this.perpX * zigAmt) * speedMult;
+    this.y += (this.vy + this.perpY * zigAmt) * speedMult;
+    if (Math.hypot(this.x - CX, this.y - CY) < 22) {
+      this.active = false;
+      return 'missed';
+    }
+    return null;
+  }
+
+  draw() {
+    const r = this.currentR;
+    /* glow */
+    ctx.beginPath(); ctx.arc(this.x, this.y, r * 2.2, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(160,80,255,0.07)'; ctx.fill();
+    /* trail */
+    this.trail.forEach((t, i) => {
+      const tr = r * (0.3 + (i / this.trail.length) * 0.7);
+      ctx.beginPath(); ctx.arc(t.x, t.y, tr, 0, Math.PI * 2);
+      ctx.fillStyle = '#a855f7'; ctx.globalAlpha = t.alpha * 0.45; ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+    /* body */
+    const sg = ctx.createRadialGradient(this.x - r*.32, this.y - r*.32, 0, this.x, this.y, r);
+    sg.addColorStop(0, '#ffffff'); sg.addColorStop(0.15, '#d080ff');
+    sg.addColorStop(0.55, '#8820dd'); sg.addColorStop(0.9, '#3a0066');
+    sg.addColorStop(1, '#000');
+    ctx.beginPath(); ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
+    ctx.fillStyle = sg;
+    ctx.shadowBlur = 10; ctx.shadowColor = '#a855f7';
+    ctx.fill(); ctx.shadowBlur = 0;
+    /* specular */
+    ctx.beginPath();
+    ctx.ellipse(this.x - r*.3, this.y - r*.3, r*.24, r*.14, Math.PI/4, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(255,255,255,0.88)'; ctx.fill();
+    /* 🌀 icon */
+    ctx.font = Math.round(r * 1.0) + 'px serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.globalAlpha = 0.85;
+    ctx.fillText('🌀', this.x, this.y + r * 2.0);
+    ctx.globalAlpha = 1;
+  }
+}
+
 /* ══════════════════════ PARTICLE / RING ══════════════════════ */
 class Particle {
   constructor(x,y,color,type='normal'){
@@ -3159,8 +3379,9 @@ function _resetState() {
   const d=DIFF[difficulty];
   health=d.hp; maxHealth=d.hp;
   speed=d.speed; spawnRate=d.rate; orbRadius=d.orb;
-  orbs=[]; bonusOrbs=[]; dangerOrbs=[]; particles=[]; rings=[];
+  orbs=[]; bonusOrbs=[]; dangerOrbs=[]; bombOrbs=[]; fastOrbs=[]; zigzagOrbs=[]; particles=[]; rings=[];
   lastSpawn=Date.now(); lastBonusSpawn=Date.now(); lastDangerSpawn=Date.now();
+  lastBombSpawn=Date.now(); lastFastSpawn=Date.now(); lastZigzagSpawn=Date.now();
   totalHits=0; totalAttempts=0; shakeAmt=0; globalPulse=0; _gameStartTime=Date.now(); _lastDiffTick=0;
   shieldOverlay.classList.remove('active');
   shieldTimerEl.classList.remove('show');
@@ -3290,6 +3511,107 @@ function checkHit() {
     }
   }
 
+  // 💣 Bomb orb — لو ضغطت عليها بتفجر كل الكرات وتاخد نقاطهم
+  for(let i=bombOrbs.length-1;i>=0;i--){
+    const bo=bombOrbs[i];
+    if(!bo||!bo.active) continue;
+    const dist=Math.hypot(bo.x-CX,bo.y-CY);
+    if(dist<120){
+      bombOrbs.splice(i,1);
+      /* فجر كل الكرات العادية وجمع نقاطهم */
+      let bonusPts = 0;
+      orbs.forEach(o=>{
+        if(o.active){
+          bonusPts += 15;
+          explode(o.x, o.y, o.col.main, 'perfect');
+          o.active = false;
+        }
+      });
+      orbs = [];
+      bonusPts = Math.max(bonusPts, 50);
+      score += bonusPts * (doublePoints?2:1);
+      scoreEl.textContent = score.toLocaleString('en-US');
+      /* explosion effect */
+      for(let k=0;k<30;k++) particles.push(new Particle(bo.x, bo.y, '#ff6600', 'bonus'));
+      for(let k=0;k<15;k++) particles.push(new Particle(bo.x, bo.y, '#ffdd00', 'perfect'));
+      rings.push(new Ring('#ff6600',40,'bonus'));
+      rings.push(new Ring('#ffcc00',60,'bonus'));
+      rings.push(new Ring('#ff4400',80,'bonus'));
+      shakeAmt=typeof S!=='undefined'&&!S.shake?0:12;
+      playSound('bonus'); playSound('levelup');
+      showFB('💣 BOOM! +'+bonusPts,'perfect');
+      scoreEl.classList.add('bump'); setTimeout(()=>scoreEl.classList.remove('bump'),400);
+      updateProgress(); checkLevel();
+      return;
+    }
+  }
+
+  // ⚡ Fast orb hit
+  for(let i=fastOrbs.length-1;i>=0;i--){
+    const fo=fastOrbs[i];
+    if(!fo||!fo.active) continue;
+    const dist=Math.hypot(fo.x-CX,fo.y-CY);
+    if(dist<35){
+      fastOrbs.splice(i,1); totalHits++;
+      const pts = 40*(doublePoints?2:1);
+      score+=pts; scoreEl.textContent=score.toLocaleString('en-US');
+      combo++; if(combo>maxCombo)maxCombo=combo;
+      if(combo>1){comboEl.textContent='×'+combo; comboCont.classList.add('show');}
+      explode(fo.x,fo.y,'#ffcc00','perfect');
+      rings.push(new Ring('#ffee00',35,'perfect'));
+      shakeAmt=typeof S!=='undefined'&&!S.shake?0:4; playSound('perfect'); playSound('score');
+      flashHit('rgba(255,200,0,0.3)');
+      showFB('⚡ +'+pts,'perfect');
+      scoreEl.classList.add('bump'); setTimeout(()=>scoreEl.classList.remove('bump'),300);
+      updateProgress(); checkLevel();
+      return;
+    } else if(dist<75){
+      fastOrbs.splice(i,1); totalHits++;
+      const pts = 20*(doublePoints?2:1);
+      score+=pts; scoreEl.textContent=score.toLocaleString('en-US');
+      explode(fo.x,fo.y,'#ffcc00','good');
+      rings.push(new Ring('#ffee00',75,'good'));
+      shakeAmt=typeof S!=='undefined'&&!S.shake?0:2; playSound('good');
+      flashHit('rgba(255,200,0,0.2)');
+      showFB('⚡ +'+pts,'good');
+      updateProgress(); checkLevel();
+      return;
+    }
+  }
+
+  // 🌀 Zigzag orb hit
+  for(let i=zigzagOrbs.length-1;i>=0;i--){
+    const zo=zigzagOrbs[i];
+    if(!zo||!zo.active) continue;
+    const dist=Math.hypot(zo.x-CX,zo.y-CY);
+    if(dist<35){
+      zigzagOrbs.splice(i,1); totalHits++;
+      const pts = 35*(doublePoints?2:1);
+      score+=pts; scoreEl.textContent=score.toLocaleString('en-US');
+      combo++; if(combo>maxCombo)maxCombo=combo;
+      if(combo>1){comboEl.textContent='×'+combo; comboCont.classList.add('show');}
+      explode(zo.x,zo.y,'#a855f7','perfect');
+      rings.push(new Ring('#a855f7',35,'perfect'));
+      shakeAmt=typeof S!=='undefined'&&!S.shake?0:4; playSound('perfect'); playSound('score');
+      flashHit('rgba(160,80,255,0.3)');
+      showFB('🌀 +'+pts,'perfect');
+      scoreEl.classList.add('bump'); setTimeout(()=>scoreEl.classList.remove('bump'),300);
+      updateProgress(); checkLevel();
+      return;
+    } else if(dist<75){
+      zigzagOrbs.splice(i,1); totalHits++;
+      const pts = 18*(doublePoints?2:1);
+      score+=pts; scoreEl.textContent=score.toLocaleString('en-US');
+      explode(zo.x,zo.y,'#a855f7','good');
+      rings.push(new Ring('#a855f7',75,'good'));
+      shakeAmt=typeof S!=='undefined'&&!S.shake?0:2; playSound('good');
+      flashHit('rgba(160,80,255,0.2)');
+      showFB('🌀 +'+pts,'good');
+      updateProgress(); checkLevel();
+      return;
+    }
+  }
+
   // Bonus orb check
   for(let i=bonusOrbs.length-1;i>=0;i--){
     const bo=bonusOrbs[i];
@@ -3314,6 +3636,8 @@ function checkHit() {
   totalAttempts++;
   let closest=null, closestD=Infinity;
   orbs.forEach(o=>{ const d=Math.hypot(o.x-CX,o.y-CY); if(d<closestD){closestD=d;closest=o;} });
+
+  /* لو مفيش normal orb قريبة — تجاهل الضغطة بدون عقوبة */
   if(!closest) return;
 
   const mult=doublePoints?2:1;
@@ -3355,6 +3679,10 @@ function checkHit() {
     combo=0; perfectStreak=0;
     comboCont.classList.remove('show'); renderStreak();
     if(closestD>100){
+      /* لو في كرة مساعدة قريبة — اللاعب ممكن كان بيحاول يضغط عليها، مش عقوبة */
+      const bonusNearby = bonusOrbs.some(bo => bo.active && Math.hypot(bo.x-CX, bo.y-CY) < 150);
+      if(bonusNearby) return;
+
       if(shieldActive){
         shieldLeft--;
         shakeAmt=typeof S !== "undefined"&&!S.shake?0:3;
@@ -3535,6 +3863,21 @@ function loop(ts) {
     lastDangerSpawn=now; dangerOrbs.push(new DangerOrb());
   }
 
+  /* 💣 Bomb orb — كل 20-30 ثانية من المستوى 3 */
+  if(bombOrbs.length===0 && now-lastBombSpawn > 20000+Math.random()*10000 && level >= 3){
+    lastBombSpawn=now; bombOrbs.push(new BombOrb());
+  }
+
+  /* ⚡ Fast orb — كل 10-18 ثانية من المستوى 2 */
+  if(fastOrbs.length===0 && now-lastFastSpawn > 10000+Math.random()*8000 && level >= 2){
+    lastFastSpawn=now; fastOrbs.push(new FastOrb());
+  }
+
+  /* 🌀 Zigzag orb — كل 15-25 ثانية من المستوى 4 */
+  if(zigzagOrbs.length===0 && now-lastZigzagSpawn > 15000+Math.random()*10000 && level >= 4){
+    lastZigzagSpawn=now; zigzagOrbs.push(new ZigzagOrb());
+  }
+
   dangerOrbs = dangerOrbs.filter(d => {
     if (!d) return false;
     const result = d.update();
@@ -3558,6 +3901,56 @@ function loop(ts) {
       return false;
     }
     if (d.active) { d.draw(); return true; }
+    return false;
+  });
+
+  /* 💣 Bomb orbs */
+  bombOrbs = bombOrbs.filter(bo => {
+    const res = bo.update();
+    if (res === 'expired') return false;
+    if (bo.active) { bo.draw(); return true; }
+    return false;
+  });
+
+  /* ⚡ Fast orbs */
+  fastOrbs = fastOrbs.filter(fo => {
+    const res = fo.update();
+    if (res === 'missed') {
+      perfectStreak=0; renderStreak();
+      if(shieldActive){
+        shieldLeft--;
+        if(shieldLeft<=0){shieldActive=false;shieldOverlay.classList.remove('active');}
+      } else {
+        health--; renderHearts();
+        shakeAmt=typeof S!=='undefined'&&!S.shake?0:9; playSound('miss');
+        flashHit('rgba(255,200,0,0.3)');
+        showFB('MISS!','miss'); combo=0; comboCont.classList.remove('show');
+        if(health<=0){ gameOver(); }
+      }
+      return false;
+    }
+    if (fo.active) { fo.draw(); return true; }
+    return false;
+  });
+
+  /* 🌀 Zigzag orbs */
+  zigzagOrbs = zigzagOrbs.filter(zo => {
+    const res = zo.update();
+    if (res === 'missed') {
+      perfectStreak=0; renderStreak();
+      if(shieldActive){
+        shieldLeft--;
+        if(shieldLeft<=0){shieldActive=false;shieldOverlay.classList.remove('active');}
+      } else {
+        health--; renderHearts();
+        shakeAmt=typeof S!=='undefined'&&!S.shake?0:9; playSound('miss');
+        flashHit('rgba(160,80,255,0.3)');
+        showFB('MISS!','miss'); combo=0; comboCont.classList.remove('show');
+        if(health<=0){ gameOver(); }
+      }
+      return false;
+    }
+    if (zo.active) { zo.draw(); return true; }
     return false;
   });
 
