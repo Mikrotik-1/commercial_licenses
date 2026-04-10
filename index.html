@@ -597,7 +597,12 @@ body {
 }
 
 /* زرار ابدأ اللعب — أنيق ومناسب */
-#startScreen .btn-main[onclick="startGame()"] {
+#startScreen .btn-main[onclick="startGame()"],
+#startScreen #startGameBtn {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  pointer-events: auto;
   padding: 16px 55px;
   font-size: 17px;
   letter-spacing: 5px;
@@ -623,51 +628,21 @@ body {
   }
 }
 
-#startScreen .btn-main[onclick="startGame()"]:hover {
+#startScreen .btn-main[onclick="startGame()"]:hover,
+#startScreen #startGameBtn:hover {
   background: rgba(0,200,232,0.18);
   transform: translateY(-2px) scale(1.02);
   animation: none;
   box-shadow: 0 0 65px rgba(0,200,232,0.65), inset 0 0 40px rgba(0,200,232,0.15);
 }
-
-#startBtnMain.starting {
-  pointer-events: none;
-  opacity: 0.82;
-  transform: none !important;
-  animation: none !important;
-  box-shadow: 0 0 28px rgba(0,200,232,0.28), inset 0 0 24px rgba(0,200,232,0.08);
+#startScreen #startGameBtn:active {
+  transform: scale(0.98);
 }
-
-#startBtnMain.starting::after {
-  content: '...';
-  margin-inline-start: 10px;
-  letter-spacing: 2px;
+#startScreen #startGameBtn.busy {
+  animation: none;
+  transform: none;
+  cursor: wait;
 }
-
-#lb-subtitle {
-  font-size: 10px;
-  color: var(--text-dim);
-  margin-inline-start: auto;
-  letter-spacing: 0.5px;
-}
-
-.lb-name-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex: 1;
-  min-width: 0;
-}
-
-.lb-meta {
-  font-size: 10px;
-  color: var(--text-dim);
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 
 .btn-main::before {
   content: '';
@@ -1799,6 +1774,151 @@ input[type=range].vslider::-webkit-slider-thumb {
   transition: opacity 0.2s;
 }
 #slowmoOverlay.active { opacity: 1; }
+
+/* ===== SAME-STYLE ENHANCEMENTS ===== */
+.mode-row {
+  display: flex;
+  gap: 8px;
+  margin: 2px 0 14px;
+  width: 100%;
+  max-width: 320px;
+}
+.modeBtn {
+  flex: 1;
+  padding: 10px 6px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.02);
+  border-radius: 14px;
+  cursor: pointer;
+  font-family: 'Tajawal', sans-serif;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-primary);
+}
+.modeBtn.active {
+  background: rgba(212,168,67,0.1);
+  border-color: rgba(212,168,67,0.5);
+  box-shadow: 0 0 22px rgba(212,168,67,0.15);
+}
+.modeBtn .m-name { font-size: 11px; font-weight: 900; letter-spacing: 1.4px; text-transform: uppercase; }
+.modeBtn .m-sub { font-size: 9px; color: var(--text-dim); letter-spacing: 1px; }
+.meta-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  max-width: 320px;
+  margin-bottom: 12px;
+}
+.meta-card {
+  flex: 1;
+  border-radius: 14px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  text-align: center;
+}
+.meta-card .m-label {
+  display: block;
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.meta-card .m-value {
+  display: block;
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  color: var(--gold-bright);
+}
+.skin-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 0 18px;
+}
+.skin-chip {
+  flex: 1;
+  padding: 10px 6px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.08);
+  cursor: pointer;
+  transition: all .2s;
+  text-align: center;
+}
+.skin-chip.active {
+  border-color: rgba(0,200,232,0.5);
+  background: rgba(0,200,232,0.08);
+  box-shadow: 0 0 22px rgba(0,200,232,0.12);
+}
+.skin-dot {
+  width: 18px; height: 18px; border-radius: 50%;
+  margin: 0 auto 6px;
+  box-shadow: 0 0 12px currentColor;
+}
+.skin-chip .skin-name {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+#timerPill {
+  position: absolute;
+  top: 98px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 14;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 24px;
+  background: rgba(212,168,67,0.08);
+  border: 1px solid rgba(212,168,67,0.25);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gold-bright);
+  box-shadow: 0 0 20px rgba(212,168,67,0.12);
+  pointer-events: none;
+}
+#timerPill.visible { display: flex; }
+#rankBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 64px;
+  margin: 6px 0 14px;
+  padding: 8px 16px;
+  border-radius: 30px;
+  border: 1px solid rgba(0,200,232,0.3);
+  background: rgba(0,200,232,0.08);
+  color: var(--cyan);
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  letter-spacing: 2px;
+  text-shadow: 0 0 18px rgba(0,200,232,0.35);
+}
+.stat.coins-stat .stat-value { color: var(--gold-bright); }
+
+
+/* start button polish */
+#startScreen #startGameBtn{
+  min-width: 220px;
+  white-space: nowrap;
+  text-align: center;
+  line-height: 1.2;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+#startScreen #startGameBtn.busy{
+  letter-spacing: 2px !important;
+}
+
 </style>
 
 <script>
@@ -1873,6 +1993,7 @@ document.addEventListener('click',function(e){
   <div id="deathFlash"></div>
   <div id="slowmoOverlay"></div>
 
+  <div id="timerPill"><span>⏱</span><span id="timerText">60</span></div>
   <div id="ui">
     <div id="hud-top">
       <!-- LEFT: BEST -->
@@ -2215,13 +2336,53 @@ document.addEventListener('click',function(e){
     <div id="leaderboard-wrap">
       <div id="lb-header">
         <span class="lb-icon">🏆</span>
-        <span data-i18n="bestPlayers">أفضل اللاعبين</span><span id="lb-subtitle">Top unique</span>
+        <span data-i18n="bestPlayers">أفضل اللاعبين</span>
       </div>
       <div id="lb-panel" class="open">
         <div id="lb-list"><div id="lb-loading">جاري التحميل...</div></div>
       </div>
     </div>
-    <button id="startBtnMain" class="btn-main" onclick="startGame()" data-i18n="startBtn">ابدأ اللعب</button>
+
+    <div class="meta-row">
+      <div class="meta-card">
+        <span class="m-label" id="coinsLabelText">Coins</span>
+        <span class="m-value" id="coinsDisplay">0</span>
+      </div>
+      <div class="meta-card">
+        <span class="m-label" id="bestModeLabelText">Mode</span>
+        <span class="m-value" id="modeDisplayMini" style="font-size:18px;color:var(--cyan);">Classic</span>
+      </div>
+    </div>
+    <div class="mode-row" id="modeRow">
+      <button class="modeBtn active" data-mode="classic" onclick="setGameMode('classic',this)">
+        <span class="m-name">Classic</span>
+        <span class="m-sub">Standard</span>
+      </button>
+      <button class="modeBtn" data-mode="time" onclick="setGameMode('time',this)">
+        <span class="m-name">Time</span>
+        <span class="m-sub">60s Rush</span>
+      </button>
+      <button class="modeBtn" data-mode="survival" onclick="setGameMode('survival',this)">
+        <span class="m-name">Survival</span>
+        <span class="m-sub">Endless</span>
+      </button>
+    </div>
+    <div class="skin-row" id="skinRow">
+      <button class="skin-chip active" data-skin="classic" onclick="setSkin('classic',this)">
+        <div class="skin-dot" style="color:#00c8e8;background:radial-gradient(circle at 30% 30%, #ffffff 0%, #00c8e8 35%, #005f6e 100%);"></div>
+        <div class="skin-name">Classic</div>
+      </button>
+      <button class="skin-chip" data-skin="gold" onclick="setSkin('gold',this)">
+        <div class="skin-dot" style="color:#d4a843;background:radial-gradient(circle at 30% 30%, #fff7db 0%, #d4a843 35%, #8a6a20 100%);"></div>
+        <div class="skin-name">Gold</div>
+      </button>
+      <button class="skin-chip" data-skin="plasma" onclick="setSkin('plasma',this)">
+        <div class="skin-dot" style="color:#9b59f5;background:radial-gradient(circle at 30% 30%, #ffffff 0%, #9b59f5 35%, #4a1a8a 100%);"></div>
+        <div class="skin-name">Plasma</div>
+      </button>
+    </div>
+
+    <button id="startGameBtn" class="btn-main" type="button" data-i18n="startBtn" onclick="handleStartButtonClick(event)">ابدأ اللعب</button>
     <div class="diff-row">
       <button class="diffBtn easy-btn active" onclick="setDifficulty('easy',this)">
         <span class="diff-icon">🌱</span>
@@ -2262,6 +2423,7 @@ document.addEventListener('click',function(e){
       <button id="submitScore" onclick="submitToLeaderboard()" data-i18n="submitScore">سجّل النتيجة</button>
     </div>
     <div id="finalScore">0</div>
+    <div id="rankBadge">B</div>
     <div class="divider"></div>
     <div class="stats-row">
       <div class="stat">
@@ -2275,6 +2437,10 @@ document.addEventListener('click',function(e){
       <div class="stat">
         <span class="stat-label" data-i18n="accuracy">الدقة</span>
         <span class="stat-value" id="accuracy">0%</span>
+      </div>
+          <div class="stat coins-stat">
+        <span class="stat-label">Coins</span>
+        <span class="stat-value" id="coinsEarned">0</span>
       </div>
     </div>
     <button class="btn-main btn-restart" onclick="restartGame()" data-i18n="retry">↺ حاول مجدداً</button>
@@ -3487,29 +3653,17 @@ function _hideAllScreens() {
 }
 
 function startGame() {
-  if (isStartingGame || gameRunning) return;
-  isStartingGame = true;
-  setStartButtonBusy(true);
-
-  try {
-    document.getElementById('langPickerBtn')?.classList.remove('open');
-    document.getElementById('langDropdown')?.classList.remove('open');
-    _hideAllScreens();
-    document.getElementById('helpBtn').style.display='none';
-    document.getElementById('pauseBtn').classList.add('visible');
-    document.getElementById('pauseBtn').innerHTML='<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="1.5" width="3.5" height="11" rx="1.5" fill="currentColor"/><rect x="8.5" y="1.5" width="3.5" height="11" rx="1.5" fill="currentColor"/></svg>';
-    _resetState();
-    beatCount=0;
-    updateHSBar();
-    startMusic();
-    requestWakeLock();
-    requestAnimationFrame(loop);
-  } finally {
-    setTimeout(() => {
-      isStartingGame = false;
-      setStartButtonBusy(false);
-    }, 450);
-  }
+  /* Close lang dropdown if open */
+  document.getElementById('langPickerBtn')?.classList.remove('open');
+  document.getElementById('langDropdown')?.classList.remove('open');
+  _hideAllScreens();
+  document.getElementById('helpBtn').style.display='none';
+  document.getElementById('pauseBtn').classList.add('visible');
+  document.getElementById('pauseBtn').innerHTML='<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="1.5" width="3.5" height="11" rx="1.5" fill="currentColor"/><rect x="8.5" y="1.5" width="3.5" height="11" rx="1.5" fill="currentColor"/></svg>';
+  _resetState();
+  beatCount=0; updateHSBar(); startMusic(); requestWakeLock();
+  loadLeaderboard();
+  requestAnimationFrame(loop);
 }
 
 function restartGame() {
@@ -3565,7 +3719,7 @@ function showMenu() {
   document.getElementById('pauseBtn').innerHTML='<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="1.5" width="3.5" height="11" rx="1.5" fill="currentColor"/><rect x="8.5" y="1.5" width="3.5" height="11" rx="1.5" fill="currentColor"/></svg>';
   document.getElementById('pauseModal').classList.remove('show');
   startScreen.style.display='flex';
-  loadLeaderboard(true);
+  loadLeaderboard();
 }
 
 function gameOver() {
@@ -4436,63 +4590,6 @@ const LB_MAX  = 10;
 let localHighScore = 0;
 let isNewRecord = false;
 
-let isStartingGame = false;
-let leaderboardBusy = false;
-let leaderboardEntries = [];
-let leaderboardRequestId = 0;
-let lastLeaderboardLoadedAt = 0;
-
-function normalizePlayerName(name) {
-  return String(name || '')
-    .trim()
-    .replace(/\s+/g, ' ')
-    .slice(0, 16)
-    .toLowerCase();
-}
-
-function prettifyPlayerName(name) {
-  const clean = String(name || '').trim().replace(/\s+/g, ' ').slice(0, 16);
-  return clean || 'مجهول';
-}
-
-function setStartButtonBusy(busy) {
-  const btn = document.getElementById('startBtnMain');
-  if (!btn) return;
-  btn.classList.toggle('starting', !!busy);
-  btn.disabled = !!busy;
-}
-
-function dedupeLeaderboardEntries(entries) {
-  const bestByName = new Map();
-  (entries || []).forEach((entry) => {
-    const key = normalizePlayerName(entry && entry.name ? entry.name : 'مجهول');
-    const normalizedEntry = {
-      ...entry,
-      name: prettifyPlayerName(entry && entry.name ? entry.name : 'مجهول'),
-      score: Number(entry && entry.score ? entry.score : 0) || 0,
-      ts: Number(entry && entry.ts ? entry.ts : 0) || 0,
-      diff: entry && entry.diff ? entry.diff : 'easy'
-    };
-    const existing = bestByName.get(key);
-    if (!existing || normalizedEntry.score > existing.score || (normalizedEntry.score === existing.score && normalizedEntry.ts > existing.ts)) {
-      bestByName.set(key, normalizedEntry);
-    }
-  });
-  return Array.from(bestByName.values()).sort((a, b) => (b.score - a.score) || (b.ts - a.ts));
-}
-
-async function fetchJSONWithTimeout(url, options = {}, timeoutMs = 7000) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const res = await fetch(url, { ...options, signal: controller.signal, cache: 'no-store' });
-    return res;
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-
 /* ── helpers ── */
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -4502,128 +4599,72 @@ function diffLabel(d) {
 }
 
 /* ── LOAD ── */
-async function loadLeaderboard(force = false) {
+async function loadLeaderboard() {
   const list = document.getElementById('lb-list');
-  if (!list) return;
-
-  const now = Date.now();
-  if (!force && leaderboardEntries.length && now - lastLeaderboardLoadedAt < 12000) {
-    renderLeaderboard(leaderboardEntries);
-    return;
-  }
-
-  const requestId = ++leaderboardRequestId;
-  leaderboardBusy = true;
   list.innerHTML = '<div class="lb-loading">'+t('lbLoading')+'</div>';
-
   try {
-    const url = FB_PATH + '.json?orderBy=%22score%22&limitToLast=40';
-    const res = await fetchJSONWithTimeout(url, {}, 7000);
+    /* Firebase REST: orderBy score descending, top LB_MAX */
+    const url = FB_PATH + '.json?orderBy=%22score%22&limitToLast=' + LB_MAX;
+    const res  = await fetch(url, { cache: 'no-store' });
     if (!res.ok) throw new Error('fetch failed');
     const data = await res.json();
+    if (!data) { list.innerHTML = '<div class="lb-empty">'+t('lbEmpty')+'</div>'; return; }
 
-    if (requestId !== leaderboardRequestId) return;
+    /* Convert object → array, sort descending */
+    const entries = Object.values(data).sort((a, b) => b.score - a.score);
+    renderLeaderboard(entries);
 
-    const rawEntries = data ? Object.values(data) : [];
-    const uniqueEntries = dedupeLeaderboardEntries(rawEntries).slice(0, LB_MAX);
-
-    leaderboardEntries = uniqueEntries;
-    lastLeaderboardLoadedAt = Date.now();
-
-    renderLeaderboard(uniqueEntries);
-
-    if (uniqueEntries.length > 0) {
-      localHighScore = Math.max(localHighScore, uniqueEntries[0].score);
+    /* Update global high score */
+    if (entries.length > 0) {
+      localHighScore = Math.max(localHighScore, entries[0].score);
       updateHSBar();
-    } else {
-      list.innerHTML = '<div class="lb-empty">'+t('lbEmpty')+'</div>';
     }
   } catch(e) {
-    if (!leaderboardEntries.length) {
-      list.innerHTML = '<div class="lb-empty">'+t('lbError')+'</div>';
-    } else {
-      renderLeaderboard(leaderboardEntries);
-    }
-  } finally {
-    leaderboardBusy = false;
+    list.innerHTML = '<div class="lb-empty">'+t('lbError')+'</div>';
   }
 }
 
 /* ── RENDER ── */
 function renderLeaderboard(entries) {
   const list = document.getElementById('lb-list');
-  if (!list) return;
-  if (!entries || !entries.length) {
-    list.innerHTML = '<div class="lb-empty">'+t('lbEmpty')+'</div>';
-    return;
-  }
-
+  if (!entries.length) { list.innerHTML = '<div class="lb-empty">'+t('lbEmpty')+'</div>'; return; }
   const rankIcons = ['🥇','🥈','🥉'];
   const rankCls   = ['r1','r2','r3'];
-
-  list.innerHTML = entries.slice(0, LB_MAX).map((e, i) => {
-    const score = Number(e.score || 0).toLocaleString('en-US');
-    const diff = diffLabel(e.diff || 'easy');
-    const meta = score + ' • ' + diff;
-    return `
-      <div class="lb-row" style="animation-delay:${i*0.06}s">
-        <span class="lb-rank ${rankCls[i]||'rn'}">${rankIcons[i]||i+1}</span>
-        <span class="lb-name-wrap">
-          <span class="lb-name">${escHtml(prettifyPlayerName(e.name || '—'))}</span>
-          <span class="lb-meta">${meta}</span>
-        </span>
-        <span class="lb-diff ${e.diff||'easy'}">${diff}</span>
-      </div>`;
-  }).join('');
+  list.innerHTML = entries.slice(0, LB_MAX).map((e, i) => `
+    <div class="lb-row" style="animation-delay:${i*0.06}s">
+      <span class="lb-rank ${rankCls[i]||'rn'}">${rankIcons[i]||i+1}</span>
+      <span class="lb-name">${escHtml(e.name||'—')}</span>
+      <span class="lb-diff ${e.diff||'easy'}">${diffLabel(e.diff)}</span>
+      <span class="lb-score">${Number(e.score).toLocaleString('en-US')}</span>
+    </div>`).join('');
 }
 
 /* ── SUBMIT ── */
 async function submitToLeaderboard() {
   const nameEl = document.getElementById('playerNameInput');
+  const name   = escHtml(nameEl.value.trim().slice(0,16)) || 'مجهول';
   const btn    = document.getElementById('submitScore');
-  if (!nameEl || !btn || btn.disabled) return;
+  btn.textContent = '...'; btn.disabled = true;
 
-  const prettyName = prettifyPlayerName(nameEl.value);
-  const normalized = normalizePlayerName(prettyName);
-  nameEl.value = prettyName;
-
-  btn.textContent = '...';
-  btn.disabled = true;
-
-  const recentSubmitKey = 'boom_last_submit_' + difficulty;
-  const recentSubmit = localStorage.getItem(recentSubmitKey);
-  if (recentSubmit) {
-    try {
-      const parsed = JSON.parse(recentSubmit);
-      if (parsed && parsed.name === normalized && parsed.score === score && Date.now() - parsed.ts < 20000) {
-        document.getElementById('nameInputWrap').classList.remove('show');
-        btn.textContent = '✓';
-        showTopNotif('🏆', t('scoreSubmitted'), 'double');
-        return;
-      }
-    } catch(e) {}
-  }
-
-  const entry = { name: prettyName, score, diff: difficulty, ts: Date.now() };
+  const entry = { name, score, diff: difficulty, ts: Date.now() };
 
   try {
-    const res = await fetchJSONWithTimeout(FB_PATH + '.json', {
+    /* Firebase REST POST — creates unique key automatically */
+    const res = await fetch(FB_PATH + '.json', {
       method : 'POST',
       headers: { 'Content-Type': 'application/json' },
       body   : JSON.stringify(entry)
-    }, 7000);
-
+    });
     if (!res.ok) throw new Error('post failed');
 
-    try {
-      localStorage.setItem(recentSubmitKey, JSON.stringify({ name: normalized, score, ts: Date.now() }));
-    } catch(e) {}
-
+    /* Keep only top LB_MAX — run cleanup quietly */
     trimLeaderboard();
+
     document.getElementById('nameInputWrap').classList.remove('show');
     showTopNotif('🏆', t('scoreSubmitted'), 'double');
     btn.textContent = '✓';
-    await loadLeaderboard(true);
+    /* Refresh leaderboard */
+    await loadLeaderboard();
 
   } catch(e) {
     btn.textContent = t('retry');
@@ -4635,25 +4676,20 @@ async function submitToLeaderboard() {
 /* ── TRIM (keep top LB_MAX) ── */
 async function trimLeaderboard() {
   try {
-    const url  = FB_PATH + '.json?orderBy=%22score%22&limitToLast=120';
-    const res  = await fetchJSONWithTimeout(url, {}, 7000);
+    const url  = FB_PATH + '.json?orderBy=%22score%22&limitToFirst=1000';
+    const res  = await fetch(url, { cache: 'no-store' });
     if (!res.ok) return;
     const data = await res.json();
     if (!data) return;
 
-    const entries = Object.entries(data).map(([k,v]) => ({
-      key:k,
-      score:Number(v && v.score ? v.score : 0) || 0,
-      ts:Number(v && v.ts ? v.ts : 0) || 0
-    }));
+    const entries = Object.entries(data).map(([k,v]) => ({ key:k, score:v.score||0 }));
+    if (entries.length <= LB_MAX) return;
 
-    if (entries.length <= 60) return;
-
-    entries.sort((a,b) => (b.score - a.score) || (b.ts - a.ts));
-    const toDelete = entries.slice(60);
-
-    await Promise.allSettled(toDelete.map(e =>
-      fetchJSONWithTimeout(FB_PATH + '/' + e.key + '.json', { method: 'DELETE' }, 7000)
+    /* Delete lowest entries beyond LB_MAX */
+    entries.sort((a,b) => b.score - a.score);
+    const toDelete = entries.slice(LB_MAX);
+    await Promise.all(toDelete.map(e =>
+      fetch(FB_PATH + '/' + e.key + '.json', { method: 'DELETE' })
     ));
   } catch(e) { /* silent */ }
 }
@@ -4661,6 +4697,7 @@ async function trimLeaderboard() {
 function updateHSBar() {
   const el = document.getElementById('hsVal');
   if (!el) return;
+  /* Sync with localStorage high score */
   const stored = parseInt(localStorage.getItem('boom_hs_' + difficulty) || '0');
   if (stored > localHighScore) localHighScore = stored;
   if (localHighScore > 0) el.textContent = localHighScore.toLocaleString('en-US');
@@ -4678,25 +4715,18 @@ function saveHighScore() {
 
 function checkNewRecord() {
   isNewRecord = score > localHighScore;
-  const badge = document.getElementById('newRecordBadge');
-  const wrap = document.getElementById('nameInputWrap');
-  const btn = document.getElementById('submitScore');
-  const input = document.getElementById('playerNameInput');
-
   if (isNewRecord) {
-    badge.classList.add('show');
-    wrap.classList.add('show');
-    input.value = '';
-    btn.textContent = t('submitScore');
-    btn.disabled = false;
+    document.getElementById('newRecordBadge').classList.add('show');
+    document.getElementById('nameInputWrap').classList.add('show');
+    document.getElementById('playerNameInput').value = '';
+    document.getElementById('submitScore').textContent = t('submitScore');
+    document.getElementById('submitScore').disabled = false;
     localHighScore = score;
     saveHighScore();
     updateHSBar();
   } else {
-    badge.classList.remove('show');
-    wrap.classList.remove('show');
-    btn.textContent = t('submitScore');
-    btn.disabled = false;
+    document.getElementById('newRecordBadge').classList.remove('show');
+    document.getElementById('nameInputWrap').classList.remove('show');
   }
 }
 
@@ -4983,8 +5013,6 @@ function applyLang() {
 
   const lbLoading = document.getElementById('lb-loading');
   if (lbLoading) lbLoading.textContent = t('lbLoading');
-  const lbSubtitle = document.getElementById('lb-subtitle');
-  if (lbSubtitle) lbSubtitle.textContent = currentLang === 'ar' ? 'أفضل نتيجة لكل اسم' : currentLang === 'fr' ? 'Meilleur score par nom' : currentLang === 'es' ? 'Mejor puntuación por nombre' : currentLang === 'de' ? 'Bester Score pro Name' : currentLang === 'zh' ? '每个名字仅显示最佳分数' : 'Best score per name';
 }
 
 /* ══ SETTINGS ══ */
@@ -5125,6 +5153,442 @@ document.addEventListener('visibilitychange', async () => {
     }
   }, 80);
 })();
+
+/* ===== SAME-STYLE ENHANCEMENTS LOGIC ===== */
+let gameMode = 'classic';
+let currentSkin = 'classic';
+let gameStartLock = false;
+let modeStartTs = 0;
+let timeAttackDuration = 60000;
+let coins = 0;
+let earnedCoinsThisRun = 0;
+
+let startBtnReleaseTimer = null;
+const MODE_TEXT = {
+  ar: {
+    classic: {name:'كلاسيك', sub:'العادي'},
+    time: {name:'الوقت', sub:'٦٠ ثانية'},
+    survival: {name:'البقاء', sub:'بقاء'}
+  },
+  en: {
+    classic: {name:'Classic', sub:'Standard'},
+    time: {name:'Time', sub:'60s Rush'},
+    survival: {name:'Survival', sub:'Endless'}
+  },
+  fr: {
+    classic: {name:'Classic', sub:'Standard'},
+    time: {name:'Temps', sub:'60 s'},
+    survival: {name:'Survie', sub:'Sans fin'}
+  },
+  es: {
+    classic: {name:'Clásico', sub:'Normal'},
+    time: {name:'Tiempo', sub:'60 s'},
+    survival: {name:'Supervivencia', sub:'Infinito'}
+  },
+  de: {
+    classic: {name:'Klassisch', sub:'Standard'},
+    time: {name:'Zeit', sub:'60 Sek.'},
+    survival: {name:'Überleben', sub:'Endlos'}
+  },
+  zh: {
+    classic: {name:'经典', sub:'标准'},
+    time: {name:'限时', sub:'60秒'},
+    survival: {name:'生存', sub:'无尽'}
+  }
+};
+
+function releaseStartButtonLock() {
+  clearTimeout(startBtnReleaseTimer);
+  startBtnReleaseTimer = null;
+  gameStartLock = false;
+  const btn = document.getElementById('startGameBtn');
+  if (btn) {
+    btn.disabled = false;
+    btn.classList.remove('busy');
+    btn.style.pointerEvents = 'auto';
+    btn.style.opacity = '1';
+  }
+  if (typeof applyLang === 'function') applyLang();
+}
+
+function setStartButtonBusy(isBusy) {
+  const btn = document.getElementById('startGameBtn');
+  if (!btn) return;
+  btn.disabled = !!isBusy;
+  btn.classList.toggle('busy', !!isBusy);
+  btn.style.pointerEvents = isBusy ? 'none' : 'auto';
+  btn.style.opacity = isBusy ? '0.9' : '1';
+  if (isBusy) {
+    const loadingMap = { ar:'جاري البدء...', en:'Starting...', fr:'Démarrage...', es:'Iniciando...', de:'Startet...', zh:'启动中...' };
+    btn.textContent = loadingMap[currentLang] || loadingMap.en;
+  } else {
+    const val = t('startBtn');
+    if (val) btn.textContent = val;
+  }
+}
+
+function loadMetaProgress() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('boom_meta_progress') || '{}');
+    coins = Number(saved.coins || 0);
+    currentSkin = saved.skin || 'classic';
+    gameMode = saved.mode || 'classic';
+  } catch(e) {}
+}
+function saveMetaProgress() {
+  try {
+    localStorage.setItem('boom_meta_progress', JSON.stringify({ coins, skin: currentSkin, mode: gameMode }));
+  } catch(e) {}
+}
+function updateMetaUI() {
+  const cd = document.getElementById('coinsDisplay');
+  const ce = document.getElementById('coinsEarned');
+  const md = document.getElementById('modeDisplayMini');
+  const modeMap = MODE_TEXT[currentLang] || MODE_TEXT.en;
+  if (cd) cd.textContent = coins.toLocaleString('en-US');
+  if (ce) ce.textContent = earnedCoinsThisRun.toLocaleString('en-US');
+  if (md) md.textContent = (modeMap[gameMode] ? modeMap[gameMode].name : 'Classic');
+  document.querySelectorAll('#modeRow .modeBtn').forEach(btn => {
+    const active = btn.getAttribute('data-mode') === gameMode;
+    btn.classList.toggle('active', !!active);
+  });
+  document.querySelectorAll('#skinRow .skin-chip').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-skin') === currentSkin);
+  });
+}
+function setGameMode(mode, el) {
+  gameMode = mode;
+  document.querySelectorAll('#modeRow .modeBtn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  updateMetaUI();
+  saveMetaProgress();
+}
+function setSkin(skin, el) {
+  currentSkin = skin;
+  document.querySelectorAll('#skinRow .skin-chip').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  updateMetaUI();
+  saveMetaProgress();
+}
+function getSkinVisual() {
+  if (currentSkin === 'gold') {
+    return { glow:'#d4a843', aura:'rgba(212,168,67,0.18)', ring:'rgba(245,204,106,0.7)', icon:'✦' };
+  }
+  if (currentSkin === 'plasma') {
+    return { glow:'#9b59f5', aura:'rgba(155,89,245,0.18)', ring:'rgba(200,150,255,0.75)', icon:'✧' };
+  }
+  return { glow:'#00c8e8', aura:'rgba(0,200,232,0.14)', ring:'rgba(0,200,232,0.65)', icon:'' };
+}
+function updateTimerPill() {
+  const pill = document.getElementById('timerPill');
+  const text = document.getElementById('timerText');
+  if (!pill || !text) return;
+  if (!gameRunning || gameMode !== 'time') {
+    pill.classList.remove('visible');
+    return;
+  }
+  const left = Math.max(0, Math.ceil((timeAttackDuration - (Date.now() - modeStartTs)) / 1000));
+  text.textContent = left;
+  pill.classList.add('visible');
+  if (left <= 10) pill.style.borderColor = 'rgba(224,54,110,0.45)';
+  else pill.style.borderColor = 'rgba(212,168,67,0.25)';
+}
+function awardCoins(amount) {
+  coins += amount;
+  earnedCoinsThisRun += amount;
+  updateMetaUI();
+  saveMetaProgress();
+}
+function computeRank(scoreVal, accVal, comboVal) {
+  if (scoreVal >= 1200 || (accVal >= 92 && comboVal >= 18)) return 'S';
+  if (scoreVal >= 700 || (accVal >= 82 && comboVal >= 10)) return 'A';
+  if (scoreVal >= 350 || accVal >= 68) return 'B';
+  return 'C';
+}
+
+/* start lock + same style start fix */
+const _origStartGame = startGame;
+startGame = function() {
+  if (gameStartLock || gameRunning) return;
+  gameStartLock = true;
+  setStartButtonBusy(true);
+  modeStartTs = Date.now();
+  earnedCoinsThisRun = 0;
+  const run = () => {
+    try {
+      _origStartGame();
+      updateMetaUI();
+      updateTimerPill();
+    } catch (err) {
+      console.error(err);
+      releaseStartButtonLock();
+      throw err;
+    }
+    clearTimeout(startBtnReleaseTimer);
+    startBtnReleaseTimer = setTimeout(() => {
+      releaseStartButtonLock();
+    }, 450);
+  };
+  if (window.requestAnimationFrame) {
+    requestAnimationFrame(run);
+  } else {
+    setTimeout(run, 0);
+  }
+};
+
+const _origResetState = _resetState;
+_resetState = function() {
+  _origResetState();
+  modeStartTs = Date.now();
+  earnedCoinsThisRun = 0;
+  if (gameMode === 'time') {
+    instructions.textContent = currentLang === 'ar' ? 'اجمع أعلى نقاط في ٦٠ ثانية' : 'Get the highest score in 60 seconds';
+  } else if (gameMode === 'survival') {
+    instructions.textContent = currentLang === 'ar' ? 'البقاء للأقوى · السرعة تزيد أسرع' : 'Survive as long as you can';
+    speed += 0.6;
+    spawnRate = Math.max(850, spawnRate - 250);
+  } else {
+    instructions.textContent = t('tapHint');
+  }
+  updateTimerPill();
+};
+
+const _origTickDifficulty = tickDifficulty;
+tickDifficulty = function() {
+  _origTickDifficulty();
+  if (gameMode === 'survival' && gameRunning && !gamePaused) {
+    const elapsed = Date.now() - modeStartTs;
+    if (elapsed > 15000 && elapsed % 5000 < 80) {
+      speed = Math.min(speed + 0.12, 14);
+      spawnRate = Math.max(520, spawnRate - 30);
+    }
+  }
+};
+
+const _origLoop = loop;
+loop = function(ts) {
+  if (gameRunning && !gamePaused && gameMode === 'time' && Date.now() - modeStartTs >= timeAttackDuration) {
+    gameOver();
+    return;
+  }
+  updateTimerPill();
+  _origLoop(ts);
+};
+
+/* skin overlay */
+const _orbDraw = Orb.prototype.draw;
+Orb.prototype.draw = function() {
+  _orbDraw.call(this);
+  const skin = getSkinVisual();
+  if (!this.active) return;
+  const r = (this.br + Math.sin(this.pulse)*2);
+  if (currentSkin !== 'classic') {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, r*1.18, 0, Math.PI*2);
+    ctx.strokeStyle = skin.ring;
+    ctx.lineWidth = 1.4;
+    ctx.globalAlpha = 0.85;
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+    ctx.font = Math.round(r*0.95) + 'px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = skin.glow;
+    ctx.globalAlpha = 0.9;
+    ctx.fillText(skin.icon, this.x, this.y);
+    ctx.globalAlpha = 1;
+  }
+};
+
+/* reward coins from hits by wrapping checkLevel-sensitive score changes indirectly */
+const _origShowFB = showFB;
+showFB = function(text, cls) {
+  if (gameRunning && (text.includes('PERFECT') || text.includes('GOOD') || text.includes('BONUS') || text.includes('+'))) {
+    if (cls === 'perfect') awardCoins(3);
+    else if (cls === 'good') awardCoins(2);
+    else if (cls === 'bonus') awardCoins(8);
+  }
+  _origShowFB(text, cls);
+};
+
+const _origGameOver = gameOver;
+gameOver = function() {
+  if (!gameRunning) return;
+  _origGameOver();
+  const acc=totalAttempts>0?Math.round(totalHits/totalAttempts*100):0;
+  const rank = computeRank(score, acc, maxCombo);
+  const rb = document.getElementById('rankBadge');
+  if (rb) {
+    rb.textContent = rank;
+    rb.style.color = rank === 'S' ? 'var(--gold-bright)' : rank === 'A' ? 'var(--cyan)' : rank === 'B' ? '#d9d9ff' : '#ff8ea7';
+    rb.style.borderColor = rank === 'S' ? 'rgba(212,168,67,0.45)' : rank === 'A' ? 'rgba(0,200,232,0.35)' : 'rgba(255,255,255,0.15)';
+    rb.style.background = rank === 'S' ? 'rgba(212,168,67,0.09)' : rank === 'A' ? 'rgba(0,200,232,0.08)' : 'rgba(255,255,255,0.04)';
+  }
+  updateMetaUI();
+};
+
+/* leaderboard best score per player */
+const _rawRenderLeaderboard = renderLeaderboard;
+renderLeaderboard = function(entries) {
+  const bestByName = {};
+  entries.forEach(e => {
+    const key = (e.name || '—').trim().toLowerCase();
+    if (!bestByName[key] || Number(e.score||0) > Number(bestByName[key].score||0)) bestByName[key] = e;
+  });
+  const merged = Object.values(bestByName).sort((a,b)=>Number(b.score||0)-Number(a.score||0)).slice(0, LB_MAX);
+  _rawRenderLeaderboard(merged);
+};
+
+const _origLoadLeaderboard = loadLeaderboard;
+loadLeaderboard = async function() {
+  const list = document.getElementById('lb-list');
+  if (list) list.innerHTML = '<div class="lb-loading">'+t('lbLoading')+'</div>';
+  try {
+    const url = FB_PATH + '.json?orderBy=%22score%22&limitToLast=' + (LB_MAX * 5);
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) throw new Error('fetch failed');
+    const data = await res.json();
+    if (!data) { if(list) list.innerHTML = '<div class="lb-empty">'+t('lbEmpty')+'</div>'; return; }
+    const entries = Object.values(data).sort((a,b)=>Number(b.score||0)-Number(a.score||0));
+    renderLeaderboard(entries);
+    if (entries.length > 0) {
+      localHighScore = Math.max(localHighScore, Number(entries[0].score||0));
+      updateHSBar();
+    }
+  } catch(e) {
+    if (list) list.innerHTML = '<div class="lb-empty">'+t('lbError')+'</div>';
+  }
+};
+
+const _origSubmitToLeaderboard = submitToLeaderboard;
+submitToLeaderboard = async function() {
+  const btn = document.getElementById('submitScore');
+  if (btn?.disabled) return;
+  return _origSubmitToLeaderboard();
+};
+
+/* add mode and rank-aware local high score by difficulty+mode */
+updateHSBar = function() {
+  const el = document.getElementById('hsVal');
+  if (!el) return;
+  const key = 'boom_hs_' + difficulty + '_' + gameMode;
+  const stored = parseInt(localStorage.getItem(key) || '0');
+  if (score > stored) localStorage.setItem(key, String(score));
+  const finalHS = Math.max(stored, score, localHighScore);
+  el.textContent = finalHS.toLocaleString('en-US');
+  el.classList.toggle('beating', score >= finalHS && score > 0);
+};
+
+const _origCheckNewRecord = typeof checkNewRecord === 'function' ? checkNewRecord : null;
+if (_origCheckNewRecord) {
+  checkNewRecord = function() {
+    const key = 'boom_hs_' + difficulty + '_' + gameMode;
+    const stored = parseInt(localStorage.getItem(key) || '0');
+    isNewRecord = score > stored;
+    if (isNewRecord) localStorage.setItem(key, String(score));
+    document.getElementById('newRecordBadge').classList.toggle('show', isNewRecord);
+    document.getElementById('nameInputWrap').classList.add('show');
+  }
+}
+
+/* text refresh for mode/start labels */
+const _origApplyLang2 = applyLang;
+applyLang = function() {
+  _origApplyLang2();
+  const isAr = currentLang === 'ar';
+  const map = {
+    coinsLabelText: isAr ? 'العملات' : 'Coins',
+    bestModeLabelText: isAr ? 'الوضع' : 'Mode'
+  };
+  Object.entries(map).forEach(([id,val])=>{ const el=document.getElementById(id); if(el) el.textContent = val; });
+
+  const modeMap = MODE_TEXT[currentLang] || MODE_TEXT.en;
+  document.querySelectorAll('#modeRow .modeBtn').forEach(btn => {
+    const mode = btn.getAttribute('data-mode');
+    const name = btn.querySelector('.m-name');
+    const sub = btn.querySelector('.m-sub');
+    if (!modeMap[mode] || !name || !sub) return;
+    name.textContent = modeMap[mode].name;
+    sub.textContent = modeMap[mode].sub;
+  });
+
+  const startBtn = document.getElementById('startGameBtn');
+  if (startBtn) {
+    if (gameStartLock || startBtn.disabled) setStartButtonBusy(true);
+    else startBtn.textContent = t('startBtn');
+  }
+
+  updateMetaUI();
+};
+
+/* init enhancement state */
+loadMetaProgress();
+setTimeout(() => { applyLang(); updateMetaUI(); }, 30);
+
+
+let lastStartTapTs = 0;
+
+function triggerGameStartNow() {
+  const btn = document.getElementById('startGameBtn');
+  if (!btn || btn.disabled || gameStartLock || gameRunning) return false;
+  const now = Date.now();
+  if (now - lastStartTapTs < 700) return false;
+  lastStartTapTs = now;
+  if (document.activeElement && typeof document.activeElement.blur === 'function') {
+    document.activeElement.blur();
+  }
+  setStartButtonBusy(true);
+  requestAnimationFrame(() => {
+    startGame();
+  });
+  return true;
+}
+
+function handleStartButtonClick(e) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  return triggerGameStartNow();
+}
+
+(function bindStartButtonOnce() {
+  const btn = document.getElementById('startGameBtn');
+  if (!btn || btn.dataset.boundClick === '1') return;
+  btn.dataset.boundClick = '1';
+  btn.removeAttribute('onclick');
+
+  const fire = function(ev){
+    if (btn.disabled || gameStartLock || gameRunning) return;
+    handleStartButtonClick(ev);
+  };
+
+  btn.addEventListener('pointerdown', fire, { passive:false });
+  btn.addEventListener('click', fire, { passive:false });
+  btn.addEventListener('keydown', function(e){
+    if (e.key === 'Enter' || e.key === ' ') fire(e);
+  });
+})();
+
+/* always release start button when leaving active play flow */
+const _origShowMenu2 = showMenu;
+showMenu = function() {
+  releaseStartButtonLock();
+  return _origShowMenu2.apply(this, arguments);
+};
+
+const _origRestartGame2 = restartGame;
+restartGame = function() {
+  releaseStartButtonLock();
+  return _origRestartGame2.apply(this, arguments);
+};
+
+const _origGameOver2 = gameOver;
+gameOver = function() {
+  releaseStartButtonLock();
+  return _origGameOver2.apply(this, arguments);
+};
+
 </script>
 </body>
 </html>
